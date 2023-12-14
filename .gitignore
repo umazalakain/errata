@@ -1,3 +1,6 @@
+target
+project/target
+.bsp
 *.class
 *.log
 
