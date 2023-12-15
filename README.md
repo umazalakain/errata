@@ -10,8 +10,8 @@ This project has not been publicly released yet. Stay tuned!
 
 The [approach to error handling taken by cats](https://typelevel.org/cats/typeclasses/applicativemonaderror.html) suffers from several shortcomings.
 Assume a method with signature `def method[F[_]: ApplicativeError[*, AppError], A](fa: F[A]): F[A]`.
-It might be the case that `method` throws errors, hence why `ApplicativeError[F, AppError]` is necessary.
-Or, it might not throw any errors, and rather handle them.
+It might be the case that `method` raises errors, hence why `ApplicativeError[F, AppError]` is necessary.
+Or, it might not raise any errors, and rather handle them.
 From the signature alone, we cannot deduce whether `method` raises errors, handles them, or does both.
 
 By itself, error handling is imprecise too. `ApplicativeError.attempt` transforms an `F[A]` into an `F[Either[E, A]]`,
@@ -31,8 +31,8 @@ This project exposes the error handling capabilities provided by [ToFu](https://
 As such, their code is at times shared verbatim.
 
 We differentiate between programs that _raise_ errors, and programs that _handle_ them.
-The type `Raise[F, E]` tells us that we know how to errors of type `E` inside an effect `F[_]`.
-The type `HandleTo[F, G, E]` tells us that we know how to handle errors of type `E` inside an effect `F[_]`, where `G[_]` is the effect after errors have been handled.
+The type `Raise[F, E]` tells us that we know how to raise errors of type `E` inside an effect `F[_]`.
+The type `HandleTo[F, G, E]` tells us that we know how to handle errors of type `E` inside an effect `F[_]`, and `G[_]` is the effect after errors have been handled.
 That is, we know that `F` may raise errors of type `E`, but `G` is free of any such constraints: _all errors of type `E` must be handled_ before transforming the effect `F` into the effect `G`.
 (One can however choose to lose precision and instantiate the output effect to be the input effect.)
 
