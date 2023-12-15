@@ -23,7 +23,7 @@ Indeed, one can extend `E1` and `E2` with `Throwable` and substitute both `Appli
 In this case we lose information about the types of errors we raise, and must suddenly deal with all errors of type `Throwable`.
 
 > :warning: **As a consequence of all of the above, services based on error handling à la cats are brittle and unnecessarily prone to runtime crashes:
-> it becomes impossible to track which modules raise what errors, and the compiler is cannot ensure that errors are appropriately dealt with.
+> it becomes impossible to track which modules raise what errors, and the compiler is cannot ensure that errors are appropriately dealt with**.
 
 ## Solution
 
