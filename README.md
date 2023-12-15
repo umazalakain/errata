@@ -19,11 +19,11 @@ which has two error channels: `Either[E, *]` where errors are reported as `Left`
 
 Moreover, managing multiple error types is highly impractical:
 using multiple implicits `ApplicativeError[F, E1]` and `ApplicativeError[F, E2]` results in ambiguous implicit resolution, since both extend `Applicative[F]`.
-Indeed, one can substitute them both with `ApplicativeThrow[F]` (`ApplicativeError[F, Throwable]`) and make both `E1` and `E2` extend `Throwable`.
-In this case too we lose precision in error handling: we lose information about what types of errors we raise, and must deal with all errors of type `Throwable`.
+Indeed, one can extend `E1` and `E2` with `Throwable` and substitute both `ApplicativeError[F, E1]` and `ApplicativeError[F, E2]` with `ApplicativeThrow[F]` (`ApplicativeError[F, Throwable]`).
+In this case we lose information about the types of errors we raise, and must suddenly deal with all errors of type `Throwable`.
 
-> :warning: **As a consequence of all this, services based on error handling à la cats are brittle and unnecessarily prone to runtime crashes, since 
-> it becomes impossible to track which modules raise what errors, and the compiler is unable to ensure that errors are appropriately dealt with.
+> :warning: **As a consequence of all of the above, services based on error handling à la cats are brittle and unnecessarily prone to runtime crashes:
+> it becomes impossible to track which modules raise what errors, and the compiler is cannot ensure that errors are appropriately dealt with.
 
 ## Solution
 
