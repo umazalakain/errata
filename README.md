@@ -1,5 +1,7 @@
 # Error handling made precise
 
+Because error handling should belong in the types.
+
 ## Rationale
 
 The [approach](https://typelevel.org/cats/typeclasses/applicativemonaderror.html) to error handling taken by `cats` suffers from several shortcomings.
@@ -16,7 +18,13 @@ using multiple implicits `ApplicativeError[F, E1]` and `ApplicativeError[F, E2]`
 Indeed, one can substitute them both with `ApplicativeThrow[F]` (`ApplicativeError[F, Throwable]`) and make both `E1` and `E2` extend `Throwable`.
 In this case too we lose precision in error handling: we lose information about what types of errors we raise, and must deal with all errors of type `Throwable`.
 
+As a consequence of all this, **services based on error handling à la cats are brittle and unnecessarily prone to runtime crashes**.
+It becomes impossible to track which modules raise what errors, and the compiler cannot help us ensuring that errors are appropriately dealt with.
+
 ## Solution
+
+This project exposes the error handling capabilities provided by [ToFu](https://github.com/tofu-tf/tofu/).
+As such their code is at times shared verbatim.
 
 TODO
 
