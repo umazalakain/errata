@@ -46,9 +46,10 @@ trait HandleTo[F[_], G[_], E] {
 ```
 
 We provide further convenience methods and bundles of types:
-- `Handle[F[_], E]`: equivalent to `Handle[F, F, E]`, plus convenience methods.
-- `ErrorsTo[F[_], G[_], E]`: equivalent to `Raise[F, E]` plus `HandleTo[F, G, E]` --- this is usually what you want.
+- `Handle[F[_], E]`: equivalent to `HandleTo[F, F, E]`, plus convenience methods.
+- `ErrorsTo[F[_], G[_], E]`: equivalent to `Raise[F, E]` plus `HandleTo[F, G, E]` --- often what you want.
 - `Errors[F[_], E]`: equivalent to `ErrorsTo[F, F, E]` plus convenience methods.
+- `TransformTo[F[_], G[_], E1, E2]`: equivalent to `HandleTo[F, G, E1]` plus `Raise[G, E2]`, plus convenience methods.
 
 ## Interoperability with cats
 
