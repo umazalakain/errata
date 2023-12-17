@@ -4,6 +4,7 @@ Because error handling belongs in the types.
 
 ## Installation
 
+This project compiles to both Scala 3.x and Scala 2.13.
 This project has not been publicly released yet. Stay tuned!
 
 ## Rationale
@@ -91,3 +92,9 @@ object Examples {
 ```
 
 Check out [more examples](examples/src/main/scala/example.scala).
+
+## Testing
+
+Errors uses [discipline](https://github.com/typelevel/discipline) for quickcheck-style testing of algebraic laws.
+[The laws](/errors/src/main/scala/errors/laws/) are grouped in [discipline bundles](/errors/src/test/scala/errors/discipline/) and [tested against concrete types](/errors/src/test/scala/errors/tests/).
+To execute the tests simply run `sbt test`.
