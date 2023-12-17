@@ -1,7 +1,8 @@
 package errors.discipline
 
 import cats.{Eq, Monad}
-import errors.{Raise}
+import errors.catsLawsIsEqToProp
+import errors.Raise
 import errors.laws.RaiseLaws
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop.forAll

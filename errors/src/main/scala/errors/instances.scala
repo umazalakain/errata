@@ -54,8 +54,8 @@ object instances {
       }
   }
 
-  final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
-    new Errors[ReaderT[F, R, *], E] {
+  final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, _], E] =
+    new Errors[ReaderT[F, R, _], E] {
       def raise[A](err: E): ReaderT[F, R, A] =
         ReaderT.liftF(F.raise(err))
 
@@ -68,24 +68,24 @@ object instances {
       def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
     }
 
-  final implicit def eitherTInstance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, *], F, E] =
-    new ErrorsTo[EitherT[F, E, *], F, E] {
+  final implicit def eitherTInstance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, _], F, E] =
+    new ErrorsTo[EitherT[F, E, _], F, E] {
       override def raise[A](err: E): EitherT[F, E, A] =
         EitherT.leftT(err)
       override def handleWith[A](fa: EitherT[F, E, A])(f: E => F[A]): F[A] =
         fa.foldF[A](f, F.pure)
     }
 
-  final implicit def optionTInstance[F[_]](implicit F: Monad[F]): ErrorsTo[OptionT[F, *], F, Unit] =
-    new ErrorsTo[OptionT[F, *], F, Unit] {
+  final implicit def optionTInstance[F[_]](implicit F: Monad[F]): ErrorsTo[OptionT[F, _], F, Unit] =
+    new ErrorsTo[OptionT[F, _], F, Unit] {
       override def raise[A](err: Unit): OptionT[F, A] =
         OptionT.none
       override def handleWith[A](fa: OptionT[F, A])(f: Unit => F[A]): F[A] =
         fa.getOrElseF(f(()))
     }
 
-  final implicit def eitherInstance[E]: ErrorsTo[Either[E, *], Id, E] =
-    new ErrorsTo[Either[E, *], Id, E] {
+  final implicit def eitherInstance[E]: ErrorsTo[Either[E, _], Id, E] =
+    new ErrorsTo[Either[E, _], Id, E] {
       override def raise[A](err: E): Either[E, A] =
         Left(err)
       override def handleWith[A](fa: Either[E, A])(f: E => Id[A]): Id[A] =

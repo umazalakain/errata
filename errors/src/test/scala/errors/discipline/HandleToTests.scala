@@ -1,6 +1,7 @@
 package errors.discipline
 
 import cats.{Applicative, Eq}
+import errors.catsLawsIsEqToProp
 import errors.HandleTo
 import errors.laws.HandleToLaws
 import org.scalacheck.Arbitrary
