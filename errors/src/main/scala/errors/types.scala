@@ -45,7 +45,7 @@ trait Handle[F[_], E] extends HandleTo[F, F, E] {
 
   def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A]
 
-  def handleWith[A](fa: F[A])(f: E => F[A]): F[A] =
+  override def handleWith[A](fa: F[A])(f: E => F[A]): F[A] =
     tryHandleWith(fa)(e => Some(f(e)))
 
   def tryHandle[A](fa: F[A])(f: E => Option[A])(implicit F: Applicative[F]): F[A] =

@@ -1,20 +1,16 @@
 package errors.laws
 
-import cats.syntax.all._
-import cats.Monad
+import cats.Applicative
 import errors._
 
-trait ErrorsLaws[F[_], E] extends ErrorsToLaws[F, F, E] {
-  implicit override def F: Errors[F, E]
+trait ErrorsLaws[F[_], E] extends RaiseLaws[F, E] with HandleLaws[F, E] with ErrorsToLaws[F, F, E] with TransformToLaws[F, F, E, E] {
+  implicit def F: Errors[F, E]
 
-  def handleWithRaise[A](fa: F[A]): IsEq[F[A]] =
-    F.handleWith(fa)(F.raise) <-> fa
+  def pureAdaptError[A](a: A, f: PartialFunction[E, E])(implicit A: Applicative[F]): IsEq[F[A]] =
+    F.adaptError(A.pure(a))(f) <-> A.pure(a)
 
-  def attemptFromEither[A](fa: F[A])(implicit M: Monad[F]): IsEq[F[A]] =
-    F.attempt(fa).flatMap(F.fromEither) <-> fa
-
-  def restoreFromOption[A](fa: F[A], e: E)(implicit M: Monad[F]): IsEq[F[A]] =
-    F.restore(fa).flatMap(F.fromOption(e)) <-> fa
+  def raiseAdaptError[A](e: E, f: PartialFunction[E, E])(implicit A: Applicative[F]): IsEq[F[A]] =
+    F.adaptError(F.raise[A](e))(f) <-> f.lift(e).fold(F.raise[A](e))(F.raise[A])
 }
 
 object ErrorsLaws {
