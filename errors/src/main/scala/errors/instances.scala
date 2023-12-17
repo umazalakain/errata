@@ -5,9 +5,14 @@ import cats.data.{EitherT, OptionT, ReaderT}
 
 import scala.reflect.ClassTag
 
-object instances {
+/* Note on the resolution of implicit instances:
+ * The Scala compiler prioritises implicits in subtypes, e.g. if A <: B then implicits in A are given a higher
+ * priority than those in B. We use this feature to direct the compiler to the most concrete instances first.
+ */
 
+trait ThrowableInstances {
   final case class WrappedError[E](tag: ClassTag[E], value: E) extends Throwable
+
   final implicit def handleThrowable[F[_], E](implicit F: Handle[F, Throwable], etag: ClassTag[E]): Handle[F, E] =
     new Handle[F, E] {
       override def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] =
@@ -16,10 +21,12 @@ object instances {
           case _ => None
         }
     }
+
   final implicit def raiseThrowable[F[_], E](implicit F: Raise[F, Throwable], etag: ClassTag[E]): Raise[F, E] =
     new Raise[F, E] {
       override def raise[A](err: E): F[A] = F.raise(WrappedError(etag, err))
     }
+
   final implicit def errorsThrowable[F[_], E](implicit F: Errors[F, Throwable], etag: ClassTag[E]): Errors[F, E] =
     new Errors[F, E] {
       override def raise[A](err: E): F[A] = F.raise(WrappedError(etag, err))
@@ -29,7 +36,9 @@ object instances {
           case _ => None
         }
     }
+}
 
+trait ApplicativeErrorInstances extends ThrowableInstances {
   // If using cats.ApplicativeError on the outer layer but want to use errors
   final implicit def errorByCatsError[F[_], E](implicit F: ApplicativeError[F, E]): Errors[F, E] =
     new Errors[F, E] {
@@ -39,8 +48,8 @@ object instances {
         F.raiseError(err)
     }
 
-  object fromCats {
-    // If using errors on the outer layer but want to use cats.ApplicativeError (uncommon)
+  object inverse {
+    // If using errors on the outer layer but want to use cats.ApplicativeError
     final implicit def catsErrorByError[F[_], E](implicit FE: Errors[F, E], A: Applicative[F]): ApplicativeError[F, E] =
       new ApplicativeError[F, E] {
         override def raiseError[A](e: E): F[A] =
@@ -53,7 +62,9 @@ object instances {
           A.pure(x)
       }
   }
+}
 
+trait ErrorsInstances extends ApplicativeErrorInstances {
   final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, _], E] =
     new Errors[ReaderT[F, R, _], E] {
       def raise[A](err: E): ReaderT[F, R, A] =
@@ -68,6 +79,24 @@ object instances {
       def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
     }
 
+  final implicit def eitherInstance1[E]: Errors[Either[E, _], E] =
+    new Errors[Either[E, _], E] {
+      override def raise[A](err: E): Either[E, A] =
+        Left(err)
+      override def tryHandleWith[A](fa: Either[E, A])(f: E => Option[Either[E, A]]): Either[E, A] =
+        fa.fold(e => f(e).getOrElse(fa), Right.apply)
+    }
+
+  final implicit val optionInstance1: Errors[Option, Unit] =
+    new Errors[Option, Unit] {
+      override def raise[A](err: Unit): Option[A] =
+        None
+      override def tryHandleWith[A](fa: Option[A])(f: Unit => Option[Option[A]]): Option[A] =
+        fa.orElse(f(()).flatten)
+    }
+}
+
+trait ErrorsToInstances extends ErrorsInstances {
   final implicit def eitherTInstance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, _], F, E] =
     new ErrorsTo[EitherT[F, E, _], F, E] {
       override def raise[A](err: E): EitherT[F, E, A] =
@@ -92,14 +121,6 @@ object instances {
         fa.fold(f, identity)
     }
 
-  final implicit def eitherInstance1[E]: Errors[Either[E, _], E] =
-    new Errors[Either[E, _], E] {
-      override def raise[A](err: E): Either[E, A] =
-        Left(err)
-      override def tryHandleWith[A](fa: Either[E, A])(f: E => Option[Either[E, A]]): Either[E, A] =
-        fa.fold(e => f(e).getOrElse(fa), Right.apply)
-    }
-
   final implicit val optionInstance: ErrorsTo[Option, Id, Unit] =
     new ErrorsTo[Option, Id, Unit] {
       override def raise[A](err: Unit): Option[A] =
@@ -107,12 +128,6 @@ object instances {
       override def handleWith[A](fa: Option[A])(f: Unit => Id[A]): Id[A] =
         fa.getOrElse(f(()))
     }
-
-  final implicit val optionInstance1: Errors[Option, Unit] =
-    new Errors[Option, Unit] {
-      override def raise[A](err: Unit): Option[A] =
-        None
-      override def tryHandleWith[A](fa: Option[A])(f: Unit => Option[Option[A]]): Option[A] =
-        fa.orElse(f(()).flatten)
-    }
 }
+
+object instances extends ErrorsToInstances

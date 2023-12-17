@@ -1,7 +1,7 @@
-import cats.syntax.all._
+import cats.syntax.all.*
 import cats.{Applicative, ApplicativeError, ApplicativeThrow, Functor}
-import errors._
-import errors.instances._
+import errors.*
+import errors.instances.*
 
 object Examples {
   sealed trait AppError
