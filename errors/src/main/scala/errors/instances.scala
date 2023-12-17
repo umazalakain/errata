@@ -92,11 +92,27 @@ object instances {
         fa.fold(f, identity)
     }
 
+  final implicit def eitherInstance1[E]: Errors[Either[E, _], E] =
+    new Errors[Either[E, _], E] {
+      override def raise[A](err: E): Either[E, A] =
+        Left(err)
+      override def tryHandleWith[A](fa: Either[E, A])(f: E => Option[Either[E, A]]): Either[E, A] =
+        fa.fold(e => f(e).getOrElse(fa), Right.apply)
+    }
+
   final implicit val optionInstance: ErrorsTo[Option, Id, Unit] =
     new ErrorsTo[Option, Id, Unit] {
       override def raise[A](err: Unit): Option[A] =
         None
       override def handleWith[A](fa: Option[A])(f: Unit => Id[A]): Id[A] =
         fa.getOrElse(f(()))
+    }
+
+  final implicit val optionInstance1: Errors[Option, Unit] =
+    new Errors[Option, Unit] {
+      override def raise[A](err: Unit): Option[A] =
+        None
+      override def tryHandleWith[A](fa: Option[A])(f: Unit => Option[Option[A]]): Option[A] =
+        fa.orElse(f(()).flatten)
     }
 }

@@ -93,7 +93,7 @@ trait TransformTo[F[_], G[_], E1, E2] extends HandleTo[F, G, E1] with Raise[G, E
  */
 @implicitNotFound("""can't understand how to deal with errors ${E} in the type ${F}
 provide an instance of Errors[${F}, ${E}] or cats.ApplicativeError[${F}, ${E}]""")
-trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E] {
+trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E] with TransformTo[F, F, E, E] {
   def adaptError[A](fa: F[A])(pf: PartialFunction[E, E]): F[A] =
     recoverWith(fa)(pf.andThen(raise[A] _))
 }
