@@ -92,7 +92,7 @@ object instances {
         fa.fold(f, identity)
     }
 
-  final implicit val optionTInstance: ErrorsTo[Option, Id, Unit] =
+  final implicit val optionInstance: ErrorsTo[Option, Id, Unit] =
     new ErrorsTo[Option, Id, Unit] {
       override def raise[A](err: Unit): Option[A] =
         None

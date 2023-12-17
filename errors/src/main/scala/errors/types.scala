@@ -11,6 +11,12 @@ import scala.annotation.implicitNotFound
 provide an instance of Raise[${F}, ${E}] or cats.ApplicativeError[${F}, ${E}]""")
 trait Raise[F[_], E] {
   def raise[A](err: E): F[A]
+
+  def fromEither[A](x: Either[E, A])(implicit F: Applicative[F]): F[A] =
+    x.fold(raise, F.pure)
+
+  def fromOption[A](e: E)(x: Option[A])(implicit F: Applicative[F]): F[A] =
+    x.fold(raise[A](e))(F.pure)
 }
 
 /** Allows to recover after an error of type ${E} in a ${F} transiting to a ${G} as a result. A `G` can either be the
@@ -81,6 +87,7 @@ trait TransformTo[F[_], G[_], E1, E2] extends HandleTo[F, G, E1] with Raise[G, E
   def transform[A](fa: F[A])(f: E1 => E2): G[A] =
     handleWith(fa)(f `andThen` raise)
 }
+
 
 /** Allows to throw and handle errors of type ${E} in a ${F}.
  */
