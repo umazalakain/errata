@@ -12,7 +12,7 @@ trait HandleToTests[F[_], G[_], E] extends Laws {
 
   def laws: HandleToLaws[F, G, E]
 
-  def raise[A](implicit
+  def handleTo[A](implicit
     ApplicativeF: Applicative[F],
     ApplicativeG: Applicative[G],
     EqGA: Eq[G[A]],
@@ -23,7 +23,7 @@ trait HandleToTests[F[_], G[_], E] extends Laws {
     ArbitraryEToA: Arbitrary[E => A]
   ) =
     new DefaultRuleSet(
-      name = "Raise",
+      name = "HandleTo",
       parent = None,
       "handleWith . pure = pure" -> forAll(laws.pureHandleWith[A] _),
       "handle . pure = pure" -> forAll(laws.pureHandle[A] _),

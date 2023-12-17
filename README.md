@@ -97,4 +97,5 @@ Check out [more examples](examples/src/main/scala/example.scala).
 
 Errors uses [discipline](https://github.com/typelevel/discipline) for quickcheck-style testing of algebraic laws.
 [The laws](/errors/src/main/scala/errors/laws/) are grouped in [discipline bundles](/errors/src/test/scala/errors/discipline/) and [tested against concrete types](/errors/src/test/scala/errors/tests/).
+Given a custom concrete type and its corresponding error raising/handling instances, you can verify them as lawful by executing against it the existing discipline bundles.
 To execute the tests simply run `sbt test`.

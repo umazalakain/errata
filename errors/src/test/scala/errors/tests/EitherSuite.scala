@@ -7,5 +7,5 @@ import munit.DisciplineSuite
 
 class EitherSuite extends DisciplineSuite {
   checkAll("Either[String,Int]", RaiseTests[Either[String, _], String].raise[Int])
-  checkAll("Either[String,Int]", HandleToTests[Either[String, _], Id, String].raise[Int])
+  checkAll("Either[String,Int]", HandleToTests[Either[String, _], Id, String].handleTo[Int])
 }

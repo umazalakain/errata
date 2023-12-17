@@ -7,6 +7,5 @@ import munit.DisciplineSuite
 
 class OptionSuite extends DisciplineSuite {
   checkAll("Option[Int]", RaiseTests[Option, Unit].raise[Int])
-  checkAll("Option[Int]", HandleToTests[Option, Id, Unit].raise[Int])
-
+  checkAll("Option[Int]", HandleToTests[Option, Id, Unit].handleTo[Int])
 }
