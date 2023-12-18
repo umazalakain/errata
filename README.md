@@ -127,6 +127,7 @@ object httpClient {
         // Handle errors
         case HTTPClientError(th) => ().pure[H]
         case OtherKindOfError => ().pure[H]
+        // No need to handle other throwables!
       }
   }
 
