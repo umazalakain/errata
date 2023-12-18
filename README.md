@@ -54,14 +54,14 @@ We provide further convenience methods and bundles of types:
 
 ## Interoperability with cats
 
-Full interoperability with cats and its `ApplicativeError` and `ApplicativeThrow` is provided in `errors.instances.*`.
+Full interoperability with cats and its `ApplicativeError` and `ApplicativeThrow` is provided in `errata.instances.*`.
 Check out [the examples](examples/src/main/scala/).
 
 
 ## Testing
 
 Errors uses [discipline](https://github.com/typelevel/discipline) for quickcheck-style testing of algebraic laws.
-[The laws](/errors/src/main/scala/errors/laws/) are grouped in [discipline bundles](/errors/src/test/scala/errors/discipline/) and [tested against concrete types](/errors/src/test/scala/errors/tests/).
+[The laws](/errata/src/main/scala/errata/laws/) are grouped in [discipline bundles](/errata/src/test/scala/errata/discipline/) and [tested against concrete types](/errata/src/test/scala/errata/tests/).
 Given a custom concrete type and its corresponding error raising/handling instances, you can verify them as lawful by executing against it the existing discipline bundles.
 To execute the tests simply run `sbt test`.
 
@@ -72,21 +72,21 @@ import cats.effect.{ExitCode, IO, IOApp}
 import cats.effect.std.Console
 import cats.syntax.all.*
 import cats.{Applicative, MonadThrow}
-import errors.*
-import errors.syntax.*
+import errata.*
+import errata.syntax.*
 
 /*
 This example demonstrates the interoperability between this project and cats errors.
 - application top-level uses cats errors
 - http client uses cats errors
-- application logic uses _errors_ only
+- application logic uses _errata_ only
 
  +-------------------+
  |      IO (cats)    |
  +-------------------+
  | https  |    app   |
  | client |   logic  |
- | (cats) | (errors) |
+ | (cats) | (errata) |
  +--------+----------+
  */
 
@@ -134,7 +134,7 @@ object httpClient extends IOApp {
   def run(args: List[String]): IO[ExitCode] = {
     // Fully cats compatible
     // Automatically derives instances of TransformTo[IO, IO, Throwable, HttpClientError] and HandleTo[IO, IO, AppError]
-    import errors.instances.*
+    import errata.instances.*
     IO.println("Expecting a properly handled error") *>
       appLogic[IO, IO, IO, Unit](HttpClient[IO]).as(ExitCode.Success)
   }
