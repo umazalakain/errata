@@ -37,8 +37,8 @@ object httpClient extends IOApp {
   case class GraphQLError(th: Throwable) extends AppError
 
   // The http client produces effects of type F
-  // TransformTo[F, G, Throwable, HttpClientError] guarantees that:
-  //   all errors of type Throwable in F are transformed into errors of type HttpClientError in G
+  // TransformTo[F, G, Throwable, AppError] guarantees that:
+  //   all errors of type Throwable in F are transformed into errors of type AppError in G
   // HandleTo[G, H, AppError] guarantees that:
   //   all errors of type AppError are handled and gone from H
   // The lack of an instance Raise[H, E] guarantees that:
