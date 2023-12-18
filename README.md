@@ -55,7 +55,7 @@ We provide further convenience methods and bundles of types:
 ## Interoperability with cats
 
 Full interoperability with cats and its `ApplicativeError` and `ApplicativeThrow` is provided in `errors.instances.*`.
-Check out [the examples](examples/src/main/scala/example.scala).
+Check out [the examples](examples/src/main/scala/).
 
 
 ## Testing
