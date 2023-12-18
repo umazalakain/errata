@@ -46,7 +46,7 @@ lazy val examples = project
   .settings(
     commonSettings,
     scalaVersion := scala3Version,
-    crossScalaVersions := Nil,
+    crossScalaVersions := Seq(scala3Version, scala2Version),
     publish / skip := true,
     libraryDependencies ++= List(
     "org.typelevel" %% "cats-effect" % "3.5.2",

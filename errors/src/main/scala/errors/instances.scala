@@ -1,6 +1,6 @@
 package errors
 
-import cats.{Applicative, ApplicativeError, ApplicativeThrow, Id, Monad}
+import cats.{Applicative, ApplicativeError, Id, Monad}
 import cats.data.{EitherT, OptionT, ReaderT}
 
 import scala.reflect.ClassTag
@@ -35,6 +35,12 @@ trait ThrowableInstances {
           case WrappedError(tag, value) if tag == etag => f(value.asInstanceOf[E])
           case _ => None
         }
+    }
+
+  final implicit def transformToByCatsError[F[_], E1, E2](implicit H: Handle[F, E1], R: Raise[F, E2]): TransformTo[F, F, E1, E2] =
+    new TransformTo[F, F, E1, E2] {
+      override def raise[A](err: E2): F[A] = R.raise(err)
+      override def handleWith[A](fa: F[A])(f: E1 => F[A]): F[A] = H.handleWith(fa)(f)
     }
 }
 
