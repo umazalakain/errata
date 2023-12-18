@@ -20,11 +20,15 @@ trait HandleTests[F[_], E] extends HandleToTests[F, F, E] {
     ArbitraryEToOptionFA: Arbitrary[E => Option[F[A]]],
     ArbitraryPartialEToFA: Arbitrary[PartialFunction[E, F[A]]],
     ArbitraryPartialEToA: Arbitrary[PartialFunction[E, A]],
-    ArbitraryEToOptionA: Arbitrary[E => Option[A]]
+    ArbitraryEToOptionA: Arbitrary[E => Option[A]],
+    EqGOptionA: Eq[F[Option[A]]],
+    EqGEitherEA: Eq[F[Either[E, A]]],
+    ArbitraryEToGA: Arbitrary[E => F[A]],
+    ArbitraryEToA: Arbitrary[E => A]
   ) =
     new DefaultRuleSet(
       name = "Handle",
-      parent = None,
+      parent = Some(handleTo[A]),
       "tryHandleWith f (pure a) = pure a" -> forAll(laws.pureTryHandleWith[A] _),
       "tryHandleWith f (raise e) = getOrElse (f e) (raise e)" -> forAll(laws.raiseTryHandleWith[A] _),
       "tryHandle f (pure a) = pure a" -> forAll(laws.pureTryHandle[A] _),
