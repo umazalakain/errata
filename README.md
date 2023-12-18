@@ -54,44 +54,9 @@ We provide further convenience methods and bundles of types:
 
 ## Interoperability with cats
 
-Full interoperability with cats and its `ApplicativeError` and `ApplicativeThrow` is provided in `errors.instances`.
+Full interoperability with cats and its `ApplicativeError` and `ApplicativeThrow` is provided in `errors.instances.*`.
+Check out [the examples](examples/src/main/scala/example.scala).
 
-```scala
-import cats.syntax.all._
-import cats.{Applicative, ApplicativeError, ApplicativeThrow, Functor}
-import errors._
-import errors.instances._
-
-object Examples {
-  sealed trait AppError
-  case object ClientError extends AppError
-
-  // Raises errors of type AppError, does not handle errors
-  def raiseAppError[F[_]](implicit F: Raise[F, AppError]): F[Unit] =
-    F.raise(ClientError)
-
-  // Handles all errors of type AppError, does not raise errors
-  def handleAppError[F[_]: Functor, G[_]: Applicative](input: F[Unit])(implicit F: HandleTo[F, G, AppError]): G[Unit] =
-    F.attempt(input).void
-
-  // Combine the above two
-  // Saises errors of type AppError
-  // Handles all errors of type AppError
-  def raiseAndHandleAppError[F[_]: Functor, G[_]: Applicative](implicit F: ErrorsTo[F, G, AppError]): G[Unit] =
-    handleAppError[F, G](raiseAppError[F])
-
-  // Given cats.ApplicativeError[F, AppError], derives ErrorTo[F, F, AppError]
-  def catsIntegration0[F[_]](implicit F: ApplicativeError[F, AppError]): F[Unit] =
-    raiseAndHandleAppError[F, F]
-
-  // Given cats.ApplicativeThrow[F], derives ErrorTo[F, F, AppError]
-  // It does this by wrapping AppError into a Throwable
-  def catsIntegration1[F[_]: ApplicativeThrow]: F[Unit] =
-    raiseAndHandleAppError[F, F]
-}
-```
-
-Check out [more examples](examples/src/main/scala/example.scala).
 
 ## Testing
 
@@ -99,3 +64,77 @@ Errors uses [discipline](https://github.com/typelevel/discipline) for quickcheck
 [The laws](/errors/src/main/scala/errors/laws/) are grouped in [discipline bundles](/errors/src/test/scala/errors/discipline/) and [tested against concrete types](/errors/src/test/scala/errors/tests/).
 Given a custom concrete type and its corresponding error raising/handling instances, you can verify them as lawful by executing against it the existing discipline bundles.
 To execute the tests simply run `sbt test`.
+
+## Example
+
+```scala
+import cats.effect.IO
+import cats.syntax.all.*
+import cats.{Applicative, MonadThrow}
+import errors.*
+import errors.syntax.*
+
+/*
+This example demonstrates the interoperability between this project and cats errors.
+- application top-level uses cats errors
+- http client uses cats errors
+- application logic uses _errors_ only
+
+ +-------------------+
+ |      IO (cats)    |
+ +-------------------+
+ | https  |    app   |
+ | client |   logic  |
+ | (cats) | (errors) |
+ +--------+----------+
+ */
+
+object httpClient {
+  // Http4s client (raises cats errors with MonadThrow)
+  trait HttpClient[F[_]] {
+    def run[A]: F[A]
+  }
+  object HttpClient {
+    def apply[F[_]](implicit F: MonadThrow[F]): HttpClient[F] = new HttpClient[F] {
+      override def run[A]: F[A] = F.raiseError(new Throwable("Some kind of error"))
+    }
+  }
+
+  // Application-wide custom error types
+  sealed trait AppError
+  case class HTTPClientError(th: Throwable) extends AppError
+  case object OtherKindOfError extends AppError
+
+  // The http client produces effects of type F
+  // TransformTo[F, G, Throwable, HttpClientError] guarantees that:
+  //   all errors of type Throwable in F are transformed into errors of type HttpClientError in G
+  // HandleTo[G, H, AppError] guarantees that:
+  //   all errors of type AppError are handled and gone from H
+  // The lack of an instance Raise[H, E] guarantees that:
+  //   the resulting effect H raises no errors at all
+  def appLogic[F[_], G[_]: Applicative, H[_]: Applicative, A](httpClient: HttpClient[F])(implicit
+                                                                                         transformTo: TransformTo[F, G, Throwable, HTTPClientError],
+                                                                                         handleTo: HandleTo[G, H, AppError]
+  ): H[Unit] = {
+    httpClient
+      .run
+      .transform(HTTPClientError.apply)
+      .map {
+        // Handle happy case
+        (_: A) => ()
+      }
+      .handleWith {
+        // Handle errors
+        case HTTPClientError(th) => ().pure[H]
+        case OtherKindOfError => ().pure[H]
+      }
+  }
+
+  def main[A]: IO[Unit] = {
+    // Fully cats compatible
+    // Automatically derives instances of TransformTo[IO, IO, Throwable, HttpClientError] and HandleTo[IO, IO, AppError]
+    import errors.instances.*
+    appLogic[IO, IO, IO, A](HttpClient[IO])
+  }
+}
+```
