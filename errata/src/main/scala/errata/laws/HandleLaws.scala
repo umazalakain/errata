@@ -1,7 +1,7 @@
-package errors.laws
+package errata.laws
 
 import cats.Applicative
-import errors._
+import errata._
 
 trait HandleLaws[F[_], E] extends HandleToLaws[F, F, E] {
   implicit def F: Handle[F, E]

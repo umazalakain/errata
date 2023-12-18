@@ -1,4 +1,4 @@
-package errors
+package errata
 
 import cats.data.Func
 import org.scalacheck.{Arbitrary, Cogen}

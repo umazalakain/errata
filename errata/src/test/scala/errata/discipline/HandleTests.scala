@@ -1,8 +1,8 @@
-package errors.discipline
+package errata.discipline
 
 import cats.{Applicative, Eq}
-import errors.{Handle, Raise, catsLawsIsEqToProp}
-import errors.laws.HandleLaws
+import errata.{Handle, Raise, catsLawsIsEqToProp}
+import errata.laws.HandleLaws
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop.forAll
 

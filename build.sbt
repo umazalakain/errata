@@ -20,29 +20,24 @@ lazy val commonSettings = Seq(
   }
 )
 
-lazy val errors = project
-  .in(file("errors"))
+lazy val errata = project
+  .in(file("errata"))
   .settings(
     commonSettings,
-    name := "errors",
+    name := "errata",
     version := "0.1.0",
-    organization := "errors",
-
+    organization := "errata",
+    scalaVersion := scala3Version,
+    crossScalaVersions := Seq(scala3Version, scala2Version),
     libraryDependencies ++= List(
       "org.typelevel" %% "cats-core" % "2.10.0",
       "org.typelevel" %% "discipline-munit" % "1.0.9" % Test
-    ),
-
-    // To make the default compiler and REPL use Dotty
-    scalaVersion := scala3Version,
-
-    // To cross compile with Scala 3 and Scala 2
-    crossScalaVersions := Seq(scala3Version, scala2Version)
+    )
   )
 
 lazy val examples = project
   .in(file("examples"))
-  .dependsOn(errors)
+  .dependsOn(errata)
   .settings(
     commonSettings,
     scalaVersion := scala3Version,
@@ -60,4 +55,5 @@ lazy val root = project
     commonSettings,
     crossScalaVersions := Nil
   )
-  .aggregate(errors, examples)
+  .aggregate(errata, examples)
+

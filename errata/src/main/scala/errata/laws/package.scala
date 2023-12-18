@@ -1,4 +1,4 @@
-package errors
+package errata
 
 package object laws {
   final case class IsEq[A](lhs: A, rhs: A)

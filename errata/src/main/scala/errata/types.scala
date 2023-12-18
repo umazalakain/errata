@@ -1,4 +1,4 @@
-package errors
+package errata
 
 import cats.{Applicative, Functor}
 import cats.syntax.all._

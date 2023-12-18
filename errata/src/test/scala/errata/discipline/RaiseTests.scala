@@ -1,9 +1,9 @@
-package errors.discipline
+package errata.discipline
 
 import cats.{Eq, Monad}
-import errors.catsLawsIsEqToProp
-import errors.Raise
-import errors.laws.RaiseLaws
+import errata.catsLawsIsEqToProp
+import errata.Raise
+import errata.laws.RaiseLaws
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop.forAll
 import org.typelevel.discipline.Laws

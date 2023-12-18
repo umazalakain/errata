@@ -2,21 +2,21 @@ import cats.effect.{ExitCode, IO, IOApp}
 import cats.effect.std.Console
 import cats.syntax.all.*
 import cats.{Applicative, MonadThrow}
-import errors.*
-import errors.syntax.*
+import errata.*
+import errata.syntax.*
 
 /*
 This example demonstrates the interoperability between this project and cats errors.
 - application top-level uses cats errors
 - http client uses cats errors
-- application logic uses _errors_ only
+- application logic uses _errata_ only
 
  +-------------------+
  |      IO (cats)    |
  +-------------------+
  | https  |    app   |
  | client |   logic  |
- | (cats) | (errors) |
+ | (cats) | (errata) |
  +--------+----------+
  */
 
@@ -64,7 +64,7 @@ object httpClient extends IOApp {
   def run(args: List[String]): IO[ExitCode] = {
     // Fully cats compatible
     // Automatically derives instances of TransformTo[IO, IO, Throwable, HttpClientError] and HandleTo[IO, IO, AppError]
-    import errors.instances.*
+    import errata.instances.*
     IO.println("Expecting a properly handled error") *>
     appLogic[IO, IO, IO, Unit](HttpClient[IO]).as(ExitCode.Success)
   }

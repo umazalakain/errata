@@ -1,6 +1,6 @@
-package errors.laws
+package errata.laws
 
-import errors.*
+import errata.*
 
 trait ErrorsLaws[F[_], E] extends RaiseLaws[F, E] with HandleLaws[F, E] with ErrorsToLaws[F, F, E] with TransformToLaws[F, F, E, E] {
   implicit def F: Errors[F, E]

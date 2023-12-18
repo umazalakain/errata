@@ -1,8 +1,8 @@
-package errors.tests
+package errata.tests
 
 import cats.Id
-import errors.discipline.*
-import errors.instances.*
+import errata.discipline.*
+import errata.instances.*
 import munit.DisciplineSuite
 
 class EitherSuite extends DisciplineSuite {

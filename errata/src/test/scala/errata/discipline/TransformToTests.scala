@@ -1,8 +1,8 @@
-package errors.discipline
+package errata.discipline
 
 import cats.{Applicative, Eq, Monad}
-import errors.{Raise, TransformTo, catsLawsIsEqToProp}
-import errors.laws.TransformToLaws
+import errata.{Raise, TransformTo, catsLawsIsEqToProp}
+import errata.laws.TransformToLaws
 import org.scalacheck.{Arbitrary, Prop}
 import org.scalacheck.Prop.forAll
 import org.typelevel.discipline.Laws

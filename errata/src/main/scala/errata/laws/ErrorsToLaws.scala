@@ -1,7 +1,7 @@
-package errors.laws
+package errata.laws
 
 import cats.{Applicative, Functor}
-import errors._
+import errata._
 
 trait ErrorsToLaws[F[_], G[_], E] extends RaiseLaws[F, E] with HandleToLaws[F, G, E] {
   implicit override def F: ErrorsTo[F, G, E]

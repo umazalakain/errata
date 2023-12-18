@@ -1,8 +1,8 @@
-package errors.discipline
+package errata.discipline
 
 import cats.{Eq, Monad}
-import errors.{Errors, Raise}
-import errors.laws.ErrorsLaws
+import errata.{Errors, Raise}
+import errata.laws.ErrorsLaws
 import org.scalacheck.{Arbitrary, Prop}
 import org.typelevel.discipline.Laws
 

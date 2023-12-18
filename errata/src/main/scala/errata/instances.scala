@@ -1,4 +1,4 @@
-package errors
+package errata
 
 import cats.{Applicative, ApplicativeError, Id, Monad}
 import cats.data.{EitherT, OptionT, ReaderT}
@@ -10,9 +10,9 @@ import scala.reflect.ClassTag
  * priority than those in B. We use this feature to direct the compiler to the most concrete instances first.
  */
 
-trait ThrowableInstances {
-  final case class WrappedError[E](tag: ClassTag[E], value: E) extends Throwable
+final case class WrappedError[E](tag: ClassTag[E], value: E) extends Throwable
 
+trait ThrowableInstances {
   final implicit def handleThrowable[F[_], E](implicit F: Handle[F, Throwable], etag: ClassTag[E]): Handle[F, E] =
     new Handle[F, E] {
       override def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] =

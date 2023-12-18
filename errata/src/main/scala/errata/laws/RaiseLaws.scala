@@ -1,8 +1,8 @@
-package errors.laws
+package errata.laws
 
 import cats.syntax.all._
 import cats.{Applicative, Monad}
-import errors._
+import errata._
 
 trait RaiseLaws[F[_], E] {
   implicit def F: Raise[F, E]
