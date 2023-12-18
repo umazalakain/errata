@@ -2,6 +2,7 @@ import cats.syntax.all.*
 import cats.{Applicative, ApplicativeError, ApplicativeThrow, Functor}
 import errors.*
 import errors.instances.*
+import errors.syntax.*
 
 object Examples {
   sealed trait AppError
@@ -13,7 +14,7 @@ object Examples {
 
   // Handles all errors of type AppError, does not raise errors
   def handleAppError[F[_]: Functor, G[_]: Applicative](input: F[Unit])(implicit F: HandleTo[F, G, AppError]): G[Unit] =
-    F.attempt(input).void
+    input.attempt.void
 
   // Combine the above two
   // Saises errors of type AppError
