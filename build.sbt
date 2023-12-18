@@ -50,7 +50,8 @@ lazy val examples = project
     publish / skip := true,
     libraryDependencies ++= List(
     "org.typelevel" %% "cats-effect" % "3.5.2",
-    )
+    ),
+    Compile / run / fork := true
   )
 
 lazy val root = project
