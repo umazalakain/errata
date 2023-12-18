@@ -113,8 +113,8 @@ object httpClient {
   // The lack of an instance Raise[H, E] guarantees that:
   //   the resulting effect H raises no errors at all
   def appLogic[F[_], G[_]: Applicative, H[_]: Applicative, A](httpClient: HttpClient[F])(implicit
-                                                                                         transformTo: TransformTo[F, G, Throwable, HTTPClientError],
-                                                                                         handleTo: HandleTo[G, H, AppError]
+    transformTo: TransformTo[F, G, Throwable, HTTPClientError],
+    handleTo: HandleTo[G, H, AppError]
   ): H[Unit] = {
     httpClient
       .run
