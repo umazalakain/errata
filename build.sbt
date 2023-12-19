@@ -6,9 +6,8 @@ ThisBuild / organization := "info.umazalakain"
 ThisBuild / organizationName := "Uma Zalakain"
 ThisBuild / startYear := Some(2023)
 ThisBuild / licenses := Seq(License.Apache2)
-ThisBuild / developers := List(
-  tlGitHubDev("umazalakain", "Uma Zalakain")
-)
+ThisBuild / developers := List(tlGitHubDev("umazalakain", "Uma Zalakain"))
+ThisBuild / tlFatalWarnings := false
 
 lazy val commonSettings = Seq(
   scalacOptions ++= {
