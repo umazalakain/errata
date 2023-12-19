@@ -27,20 +27,20 @@ trait HandleTests[F[_], E] extends HandleToTests[F, F, E] {
   def laws: HandleLaws[F, E]
 
   def handle[A](implicit
-    ApplicativeF: Applicative[F],
-    ArbitraryA: Arbitrary[A],
-    EqFA: Eq[F[A]],
-    RaiseFE: Raise[F, E],
-    ArbitraryE: Arbitrary[E],
-    ArbitraryFA: Arbitrary[F[A]],
-    ArbitraryEToOptionFA: Arbitrary[E => Option[F[A]]],
-    ArbitraryPartialEToFA: Arbitrary[PartialFunction[E, F[A]]],
-    ArbitraryPartialEToA: Arbitrary[PartialFunction[E, A]],
-    ArbitraryEToOptionA: Arbitrary[E => Option[A]],
-    EqGOptionA: Eq[F[Option[A]]],
-    EqGEitherEA: Eq[F[Either[E, A]]],
-    ArbitraryEToGA: Arbitrary[E => F[A]],
-    ArbitraryEToA: Arbitrary[E => A]
+      ApplicativeF: Applicative[F],
+      ArbitraryA: Arbitrary[A],
+      EqFA: Eq[F[A]],
+      RaiseFE: Raise[F, E],
+      ArbitraryE: Arbitrary[E],
+      ArbitraryFA: Arbitrary[F[A]],
+      ArbitraryEToOptionFA: Arbitrary[E => Option[F[A]]],
+      ArbitraryPartialEToFA: Arbitrary[PartialFunction[E, F[A]]],
+      ArbitraryPartialEToA: Arbitrary[PartialFunction[E, A]],
+      ArbitraryEToOptionA: Arbitrary[E => Option[A]],
+      EqGOptionA: Eq[F[Option[A]]],
+      EqGEitherEA: Eq[F[Either[E, A]]],
+      ArbitraryEToGA: Arbitrary[E => F[A]],
+      ArbitraryEToA: Arbitrary[E => A]
   ) =
     new DefaultRuleSet(
       name = "Handle",
@@ -54,7 +54,7 @@ trait HandleTests[F[_], E] extends HandleToTests[F, F, E] {
       "recover f (pure a) = pure a" -> forAll(laws.pureRecover[A] _),
       "recover f (raise e) = fold (f e) (raise e) pure" -> forAll(laws.raiseRecover[A] _),
       "restoreWith fa (pure a) = pure a" -> forAll(laws.pureRestoreWith[A] _),
-      "restoreWith fa (raise e) = fa" -> forAll(laws.raiseRestoreWith[A] _),
+      "restoreWith fa (raise e) = fa" -> forAll(laws.raiseRestoreWith[A] _)
     )
 
 }

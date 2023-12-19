@@ -29,14 +29,14 @@ trait HandleToTests[F[_], G[_], E] extends Laws {
   def laws: HandleToLaws[F, G, E]
 
   def handleTo[A](implicit
-    ApplicativeF: Applicative[F],
-    ApplicativeG: Applicative[G],
-    EqGA: Eq[G[A]],
-    EqGOptionA: Eq[G[Option[A]]],
-    EqGEitherEA: Eq[G[Either[E, A]]],
-    ArbitraryA: Arbitrary[A],
-    ArbitraryEToGA: Arbitrary[E => G[A]],
-    ArbitraryEToA: Arbitrary[E => A]
+      ApplicativeF: Applicative[F],
+      ApplicativeG: Applicative[G],
+      EqGA: Eq[G[A]],
+      EqGOptionA: Eq[G[Option[A]]],
+      EqGEitherEA: Eq[G[Either[E, A]]],
+      ArbitraryA: Arbitrary[A],
+      ArbitraryEToGA: Arbitrary[E => G[A]],
+      ArbitraryEToA: Arbitrary[E => A]
   ) =
     new DefaultRuleSet(
       name = "HandleTo",
@@ -44,7 +44,7 @@ trait HandleToTests[F[_], G[_], E] extends Laws {
       "handleWith . pure = pure" -> forAll(laws.pureHandleWith[A] _),
       "handle . pure = pure" -> forAll(laws.pureHandle[A] _),
       "restore . pure = pure . some" -> forAll(laws.pureRestore[A] _),
-      "attempt . pure = pure . right" -> forAll(laws.pureAttempt[A] _),
+      "attempt . pure = pure . right" -> forAll(laws.pureAttempt[A] _)
     )
 
 }

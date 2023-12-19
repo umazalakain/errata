@@ -29,17 +29,17 @@ trait ErrorsToTests[F[_], G[_], E] extends RaiseTests[F, E] with HandleToTests[F
   def laws: ErrorsToLaws[F, G, E]
 
   def errorsTo[A](implicit
-    MonadF: Monad[F],
-    ApplicativeG: Applicative[G],
-    EqFA: Eq[F[A]],
-    EqGA: Eq[G[A]],
-    EqGOptionA: Eq[G[Option[A]]],
-    EqGEitherEA: Eq[G[Either[E, A]]],
-    ArbitraryA: Arbitrary[A],
-    ArbitraryE: Arbitrary[E],
-    ArbitraryAToFA: Arbitrary[A => F[A]],
-    ArbitraryEToGA: Arbitrary[E => G[A]],
-    ArbitraryEToA: Arbitrary[E => A],
+      MonadF: Monad[F],
+      ApplicativeG: Applicative[G],
+      EqFA: Eq[F[A]],
+      EqGA: Eq[G[A]],
+      EqGOptionA: Eq[G[Option[A]]],
+      EqGEitherEA: Eq[G[Either[E, A]]],
+      ArbitraryA: Arbitrary[A],
+      ArbitraryE: Arbitrary[E],
+      ArbitraryAToFA: Arbitrary[A => F[A]],
+      ArbitraryEToGA: Arbitrary[E => G[A]],
+      ArbitraryEToA: Arbitrary[E => A]
   ): RuleSet = {
     new RuleSet {
       override def name: String = "ErrorsTo"
@@ -51,7 +51,7 @@ trait ErrorsToTests[F[_], G[_], E] extends RaiseTests[F, E] with HandleToTests[F
         "restore . raise e = pure none" -> forAll(laws.raiseRestore[A] _),
         "attempt . raise e = pure left e" -> forAll(laws.raiseAttempt[A] _),
         "restore . fromOption e opt = pure opt" -> forAll(laws.fromEitherAttempt[A] _),
-        "attempt . fromEither e eth = pure eth" -> forAll(laws.fromOptionRestore[A] _),
+        "attempt . fromEither e eth = pure eth" -> forAll(laws.fromOptionRestore[A] _)
       )
     }
   }

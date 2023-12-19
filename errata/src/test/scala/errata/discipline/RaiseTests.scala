@@ -29,11 +29,11 @@ trait RaiseTests[F[_], E] extends Laws {
   def laws: RaiseLaws[F, E]
 
   def raise[A](implicit
-    MonadF: Monad[F],
-    EqFA: Eq[F[A]],
-    ArbitraryA: Arbitrary[A],
-    ArbitraryE: Arbitrary[E],
-    ArbitraryFA: Arbitrary[A => F[A]]
+      MonadF: Monad[F],
+      EqFA: Eq[F[A]],
+      ArbitraryA: Arbitrary[A],
+      ArbitraryE: Arbitrary[E],
+      ArbitraryFA: Arbitrary[A => F[A]]
   ) =
     new DefaultRuleSet(
       name = "Raise",
@@ -42,7 +42,7 @@ trait RaiseTests[F[_], E] extends Laws {
       "fromEither . left  = raise" -> forAll(laws.leftFromEither[A] _),
       "fromEither . right = pure" -> forAll(laws.rightFromEither[A] _),
       "fromOption . none  = raise" -> forAll(laws.noneFromOption[A] _),
-      "fromOption . some  = pure" -> forAll(laws.someFromOption[A] _),
+      "fromOption . some  = pure" -> forAll(laws.someFromOption[A] _)
     )
 
 }
