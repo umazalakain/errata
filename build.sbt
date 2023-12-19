@@ -13,9 +13,9 @@ ThisBuild / developers := List(
 lazy val commonSettings = Seq(
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => Seq("-Ykind-projector:underscores")
+      case Some((3, _))       => Seq("-Ykind-projector:underscores")
       case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
-      case _ => Nil
+      case _                  => Nil
     }
   }
 )
@@ -45,7 +45,7 @@ lazy val examples = project
     crossScalaVersions := Seq(scala3Version, scala2Version),
     publish / skip := true,
     libraryDependencies ++= List(
-    "org.typelevel" %% "cats-effect" % "3.5.2",
+      "org.typelevel" %% "cats-effect" % "3.5.2"
     ),
     Compile / run / fork := true
   )
