@@ -1,16 +1,16 @@
 val scala2Version = "2.13.12"
 val scala3Version = "3.3.1"
 
-lazy val commonSettings = Seq(
-  libraryDependencies ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, _)) => Seq(
-        compilerPlugin("org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full)
-      )
-      case _ => Nil
-    }
-  },
+ThisBuild / tlBaseVersion := "0.1"
+ThisBuild / organization := "info.umazalakain"
+ThisBuild / organizationName := "Uma Zalakain"
+ThisBuild / startYear := Some(2023)
+ThisBuild / licenses := Seq(License.Apache2)
+ThisBuild / developers := List(
+  tlGitHubDev("umazalakain", "Uma Zalakain")
+)
 
+lazy val commonSettings = Seq(
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) => Seq("-Ykind-projector:underscores")
@@ -20,12 +20,13 @@ lazy val commonSettings = Seq(
   }
 )
 
+lazy val root = tlCrossRootProject.aggregate(errata, examples)
+
 lazy val errata = project
   .in(file("errata"))
   .settings(
     commonSettings,
     name := "errata",
-    version := "0.1.0",
     organization := "errata",
     scalaVersion := scala3Version,
     crossScalaVersions := Seq(scala3Version, scala2Version),
@@ -48,12 +49,3 @@ lazy val examples = project
     ),
     Compile / run / fork := true
   )
-
-lazy val root = project
-  .in(file("."))
-  .settings(
-    commonSettings,
-    crossScalaVersions := Nil
-  )
-  .aggregate(errata, examples)
-
