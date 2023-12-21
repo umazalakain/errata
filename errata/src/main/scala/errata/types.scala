@@ -37,6 +37,10 @@ trait Raise[F[_], E] {
     x.fold(raise[A](e))(F.pure)
 }
 
+object Raise {
+  def apply[F[_], E](implicit ev: Raise[F, E]): Raise[F, E] = ev
+}
+
 /** Allows to recover after an error of type ${E} in a ${F} transiting to a ${G} as a result. A `G` can either be the
   * same as a `F` or some "subconstructor" having less errors semantically.
   */
@@ -59,6 +63,10 @@ trait HandleTo[F[_], G[_], E] {
       fa: F[A]
   )(implicit F: Functor[F], G: Applicative[G]): G[Either[E, A]] =
     handle(F.map(fa)(_.asRight[E]))(_.asLeft)
+}
+
+object HandleTo {
+  def apply[F[_], G[_], E](implicit ev: HandleTo[F, G[_], E]): HandleTo[F, G[_], E] = ev
 }
 
 /** Allows to recover after an error of type ${E} in a ${F}.
@@ -92,6 +100,8 @@ trait Handle[F[_], E] extends HandleTo[F, F, E] {
 }
 
 object Handle {
+  def apply[F[_], E](implicit ev: Handle[F, E]): Handle[F, E] = ev
+
   trait ByRecover[F[_], E] extends Handle[F, E] {
     def recWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A]
 
@@ -109,6 +119,10 @@ provide an instance of ErrorsTo[${F}, ${G}, ${E}] or cats.ApplicativeError[${F},
 )
 trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
 
+object ErrorsTo {
+  def apply[F[_], G[_], E](implicit ev: ErrorsTo[F, G, E]): ErrorsTo[F, G, E] = ev
+}
+
 /** Transforms errors of type ${E1} in ${F} into errors of type ${E2} in ${G}. Allows to handle errors of type ${E1} in
   * an ${F} transitioning to a ${G} when recovering. Allows to raise errors of type ${E2} in a ${G}.
   */
@@ -121,6 +135,10 @@ trait TransformTo[F[_], G[_], E1, E2] extends HandleTo[F, G, E1] with Raise[G, E
     handleWith(fa)(f `andThen` raise)
 }
 
+object TransformTo {
+  def apply[F[_], G[_], E1, E2](implicit ev: TransformTo[F, G, E1, E2]): TransformTo[F, G, E1, E2] = ev
+}
+
 /** Allows to throw and handle errors of type ${E} in a ${F}.
   */
 @implicitNotFound(
@@ -128,3 +146,7 @@ trait TransformTo[F[_], G[_], E1, E2] extends HandleTo[F, G, E1] with Raise[G, E
 provide an instance of Errors[${F}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
 trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E] with TransformTo[F, F, E, E]
+
+object Errors {
+  def apply[F[_], E](implicit ev: Errors[F, E]): Errors[F, E] = ev
+}
