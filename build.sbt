@@ -1,7 +1,8 @@
 val scala2Version = "2.13.12"
 val scala3Version = "3.3.1"
 
-ThisBuild / name := "errata"
+name := "errata"
+sonatypeProfileName := "info.umazalakain"
 ThisBuild / tlBaseVersion := "0.1"
 ThisBuild / organization := "info.umazalakain"
 ThisBuild / organizationName := "Uma Zalakain"
@@ -20,11 +21,7 @@ lazy val commonSettings = Seq(
   }
 )
 
-lazy val root = tlCrossRootProject
-  .aggregate(errata, examples)
-  .settings(
-    publish / skip := true
-  )
+lazy val root = tlCrossRootProject.aggregate(errata, examples)
 
 lazy val errata = project
   .in(file("errata"))
