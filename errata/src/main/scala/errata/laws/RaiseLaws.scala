@@ -18,7 +18,8 @@ package errata.laws
 
 import cats.syntax.all._
 import cats.{Applicative, Monad}
-import errata._
+import errata.*
+import IsEq.IsEqSyntax
 
 trait RaiseLaws[F[_], E] {
   implicit def F: Raise[F, E]

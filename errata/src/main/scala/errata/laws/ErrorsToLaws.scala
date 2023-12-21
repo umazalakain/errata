@@ -17,7 +17,8 @@
 package errata.laws
 
 import cats.{Applicative, Functor}
-import errata._
+import errata.*
+import IsEq.IsEqSyntax
 
 trait ErrorsToLaws[F[_], G[_], E] extends RaiseLaws[F, E] with HandleToLaws[F, G, E] {
   implicit override def F: ErrorsTo[F, G, E]

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package errata
+package errata.laws
 
-package object laws {
-  final case class IsEq[A](lhs: A, rhs: A)
+final case class IsEq[A](lhs: A, rhs: A)
 
+object IsEq {
   implicit class IsEqSyntax[A](lhs: A) {
     def <->(rhs: A): IsEq[A] = IsEq(lhs, rhs)
   }

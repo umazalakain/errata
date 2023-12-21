@@ -17,7 +17,8 @@
 package errata.laws
 
 import cats.Applicative
-import errata._
+import errata.*
+import IsEq.IsEqSyntax
 
 trait HandleToLaws[F[_], G[_], E] {
   implicit def F: HandleTo[F, G, E]
