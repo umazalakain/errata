@@ -20,7 +20,11 @@ lazy val commonSettings = Seq(
   }
 )
 
-lazy val root = tlCrossRootProject.aggregate(errata, examples)
+lazy val root = tlCrossRootProject
+  .aggregate(errata, examples)
+  .settings(
+    publish / skip := true
+  )
 
 lazy val errata = project
   .in(file("errata"))
