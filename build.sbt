@@ -38,6 +38,7 @@ lazy val errata = project
 lazy val examples = project
   .in(file("examples"))
   .dependsOn(errata)
+  .disablePlugins(MimaPlugin)
   .settings(
     commonSettings,
     scalaVersion := scala3Version,
