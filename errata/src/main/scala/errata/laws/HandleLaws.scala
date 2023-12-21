@@ -29,7 +29,6 @@ trait HandleLaws[F[_], E] extends HandleToLaws[F, F, E] {
     F.tryHandleWith(A.pure(a))(f) <-> A.pure(a)
 
   def raiseTryHandleWith[A](e: E, f: E => Option[F[A]])(implicit
-      A: Applicative[F],
       R: Raise[F, E]
   ): IsEq[F[A]] =
     F.tryHandleWith(R.raise[A](e))(f) <-> f(e).getOrElse(R.raise[A](e))
@@ -51,7 +50,6 @@ trait HandleLaws[F[_], E] extends HandleToLaws[F, F, E] {
     F.recoverWith(A.pure(a))(f) <-> A.pure(a)
 
   def raiseRecoverWith[A](e: E, f: PartialFunction[E, F[A]])(implicit
-      A: Applicative[F],
       R: Raise[F, E]
   ): IsEq[F[A]] =
     F.recoverWith(R.raise[A](e))(f) <-> f.lift(e).getOrElse(R.raise[A](e))
@@ -73,7 +71,6 @@ trait HandleLaws[F[_], E] extends HandleToLaws[F, F, E] {
     F.restoreWith(A.pure(a))(fa) <-> A.pure(a)
 
   def raiseRestoreWith[A](e: E, fa: F[A])(implicit
-      A: Applicative[F],
       R: Raise[F, E]
   ): IsEq[F[A]] =
     F.restoreWith(R.raise[A](e))(fa) <-> fa
