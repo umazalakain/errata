@@ -4,8 +4,12 @@ Because error handling belongs in the types.
 
 ## Installation
 
-This project compiles to both Scala 3.x and Scala 2.13.
-This project has not been publicly released yet. Stay tuned!
+This project compiles to Scala 3.x and Scala 2.13.
+
+Add it as an sbt dependency:
+```scala
+libraryDependencies += "info.umazalakain" % "errata" %% "0.1.0"
+```
 
 ## Rationale
 

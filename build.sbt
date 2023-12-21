@@ -2,7 +2,7 @@ val scala2Version = "2.13.12"
 val scala3Version = "3.3.1"
 
 name := "errata"
-sonatypeProfileName := "info.umazalakain"
+description := "Error handling made precise. Because error handling belongs in the types."
 ThisBuild / tlBaseVersion := "0.1"
 ThisBuild / organization := "info.umazalakain"
 ThisBuild / organizationName := "Uma Zalakain"
