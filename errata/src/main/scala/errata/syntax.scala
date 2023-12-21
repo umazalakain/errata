@@ -19,8 +19,8 @@ package errata
 import cats.{Applicative, Functor}
 
 object syntax {
-  implicit class RaiseSyntax[F[_], E2, E1 <: E2, A](err: E1)(implicit F: Raise[F, E2]) {
-    def raise: F[A] = F.raise(err)
+  implicit class RaiseSyntax[F[_], E2, E1 <: E2](err: E1)(implicit F: Raise[F, E2]) {
+    def raise[A]: F[A] = F.raise(err)
   }
 
   implicit class HandleToSyntax[F[_], G[_], E, A](fa: F[A])(implicit F: HandleTo[F, G, E]) {
