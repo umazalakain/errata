@@ -27,8 +27,6 @@ lazy val errata = project
   .in(file("errata"))
   .settings(
     commonSettings,
-    name := "errata",
-    organization := "errata",
     scalaVersion := scala3Version,
     crossScalaVersions := Seq(scala3Version, scala2Version),
     libraryDependencies ++= List(
