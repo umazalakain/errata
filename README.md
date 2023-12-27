@@ -60,7 +60,9 @@ That is, _all_ errors of type `E` are dealt with by the time we reach `G`.
 
 ### Bundles
 
-We provide further convenience methods and bundles of types:
+We provide further convenience methods and bundles of types.
+You may check them out in more detail [here](errata/src/main/scala/errata/types.scala).
+
 - `Handle[F[_], E]`: equivalent to `HandleTo[F, F, E]`, plus convenience methods.
 - `ErrorsTo[F[_], G[_], E]`: equivalent to `Raise[F, E]` plus `HandleTo[F, G, E]` --- often what you want.
 - `Errors[F[_], E]`: equivalent to `ErrorsTo[F, F, E]` plus convenience methods.
