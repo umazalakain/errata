@@ -19,13 +19,14 @@ It might be the case that `method` raises errors, hence why `ApplicativeError[F,
 Or, it might not raise any errors, and rather handle them.
 From the signature alone, we cannot deduce whether `method` raises errors, handles them, or does both.
 
-By itself, error handling is imprecise too. `ApplicativeError.attempt` transforms an `F[A]` into an `F[Either[E, A]]`,
-which has two error channels: `Either[E, *]` where errors are reported as `Left`; and `F` itself, which is still capable of raising errors.
+By itself, error handling is imprecise too.
+`ApplicativeError.attempt` transforms an `F[A]` into an `F[Either[E, A]]`, which has two error channels: `Either[E, *]` where errors are reported as `Left`; and `F` itself, still capable of raising errors.
+_The fact that errors were handled is not reflected in the effect types._
 
 Moreover, managing multiple error types is highly impractical:
 using multiple implicits `ApplicativeError[F, E1]` and `ApplicativeError[F, E2]` results in ambiguous implicit resolution, since both extend `Applicative[F]`.
 Indeed, one can extend `E1` and `E2` with `Throwable` and substitute both `ApplicativeError[F, E1]` and `ApplicativeError[F, E2]` with `ApplicativeThrow[F]` (`ApplicativeError[F, Throwable]`).
-In this case we lose information about the types of errors we raise, and must suddenly deal with all errors of type `Throwable`.
+In this case, we lose information about the types of errors we raise, and must now deal with all errors of type `Throwable`.
 
 > :warning: **As a consequence of all of the above, services based on error handling à la cats are brittle and unnecessarily prone to runtime crashes:
 > it becomes impossible to track which modules raise what errors, and the compiler cannot ensure that errors are appropriately dealt with**.
@@ -36,19 +37,28 @@ This project exposes the error handling capabilities provided by [ToFu](https://
 As such, their code is at times shared verbatim.
 
 We differentiate between programs that _raise_ errors, and programs that _handle_ them.
-The type `Raise[F, E]` tells us that we know how to raise errors of type `E` inside an effect `F[_]`.
-The type `HandleTo[F, G, E]` tells us that we know how to handle errors of type `E` inside an effect `F[_]`, and `G[_]` is the effect after errors have been handled.
-That is, we know that `F` may raise errors of type `E`, but `G` is free of any such constraints: _all errors of type `E` must be handled_ before transforming the effect `F` into the effect `G`.
-(One can however choose to lose precision and instantiate the output effect to be the input effect.)
 
+### Raising errors
+
+The type `Raise[F, E]` tells us that we know how to raise errors of type `E` inside an effect `F[_]`.
 ```scala
 trait Raise[F[_], E] {
   def raise[A](err: E): F[A]
 }
+```
+
+### Handling errors
+
+The type `HandleTo[F, G, E]` tells us that we know how to transform an effect `F[_]` into an effect `G[_]` by handling all errors of type `E`.
+```scala
 trait HandleTo[F[_], G[_], E] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
 }
 ```
+For any type `A`, we are able to transform _all_ values of type `F[A]` into values of type `G[A]` _merely_ by handling the error cases with `E => G[A]`.
+That is, _all_ errors of type `E` are dealt with by the time we reach `G`.
+
+### Bundles
 
 We provide further convenience methods and bundles of types:
 - `Handle[F[_], E]`: equivalent to `HandleTo[F, F, E]`, plus convenience methods.
@@ -56,17 +66,38 @@ We provide further convenience methods and bundles of types:
 - `Errors[F[_], E]`: equivalent to `ErrorsTo[F, F, E]` plus convenience methods.
 - `TransformTo[F[_], G[_], E1, E2]`: equivalent to `HandleTo[F, G, E1]` plus `Raise[G, E2]`, plus convenience methods.
 
+### Example instances
+
+As an example, we derive instances `Raise` and `HandleTo` for the concrete type `Either[E, _]`.
+We provide these instances by combining them into one single instance `ErrorsTo[Either[E, _], Id, E]`.
+This shows that:
+- for any value type `A` we can use `Either[E, A]` to represent errors; and that
+- for any value type `A` we can transform values of type `Either[E, A]` into values of type `Id[A]` (aka `A`) by handling errors of type `E`.
+
+```scala
+final implicit def eitherInstance[E]: ErrorsTo[Either[E, _], Id, E] =
+  new ErrorsTo[Either[E, _], Id, E] {
+    override def raise[A](err: E): Either[E, A] =
+      Left(err)
+    override def handleWith[A](fa: Either[E, A])(f: E => Id[A]): Id[A] =
+      fa.fold(f, identity)
+  }
+```
+
 ## Interoperability with cats
 
 Full interoperability with cats and its `ApplicativeError` and `ApplicativeThrow` is provided in `errata.instances.*`.
 Check out [the examples](examples/src/main/scala/).
 
 
-## Testing
+## Algebraic laws and testing
 
-Errors uses [discipline](https://github.com/typelevel/discipline) for quickcheck-style testing of algebraic laws.
-[The laws](/errata/src/main/scala/errata/laws/) are grouped in [discipline bundles](/errata/src/test/scala/errata/discipline/) and [tested against concrete types](/errata/src/test/scala/errata/tests/).
-Given a custom concrete type and its corresponding error raising/handling instances, you can verify them as lawful by executing against it the existing discipline bundles.
+All instances must satisfy certain [algebraic laws](/errata/src/main/scala/errata/laws/) to be considered well behaved.
+
+We use [discipline](https://github.com/typelevel/discipline) to perform quickcheck-style checking of these laws.
+The laws are grouped into [discipline bundles](/errata/src/test/scala/errata/discipline/) and [tested against concrete types](/errata/src/test/scala/errata/tests/).
+Given a custom concrete type and its corresponding error raising/handling instances, you can verify they are lawful by running them on the existing discipline bundles.
+
 To execute the tests simply run `sbt test`.
 
 ## Example
