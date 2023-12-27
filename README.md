@@ -68,6 +68,14 @@ You may check them out in more detail [here](errata/src/main/scala/errata/types.
 - `Errors[F[_], E]`: equivalent to `ErrorsTo[F, F, E]` plus convenience methods.
 - `TransformTo[F[_], G[_], E1, E2]`: equivalent to `HandleTo[F, G, E1]` plus `Raise[G, E2]`, plus convenience methods.
 
+### Syntax
+
+We provide convenience syntax for error types `E` and effect types `F[A]`.
+It can be brought into scope with:
+```scala
+import errata.syntax.*
+```
+
 ### Example instances
 
 As an example, we derive instances `Raise` and `HandleTo` for the concrete type `Either[E, _]`.
