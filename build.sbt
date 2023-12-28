@@ -3,7 +3,7 @@ val scala3Version = "3.3.1"
 
 name := "errata"
 description := "Error handling made precise. Because error handling belongs in the types."
-ThisBuild / tlBaseVersion := "0.1"
+ThisBuild / tlBaseVersion := "0.2"
 ThisBuild / organization := "info.umazalakain"
 ThisBuild / organizationName := "Uma Zalakain"
 ThisBuild / startYear := Some(2023)
