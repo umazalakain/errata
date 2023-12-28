@@ -23,6 +23,18 @@ object syntax {
     def raise[A]: F[A] = F.raise(err)
   }
 
+  implicit class EitherLiftSyntax[F[_], E2, E1 <: E2, A](either: Either[E1, A])(implicit F: Raise[F, E2]) {
+    def liftTo(implicit A: Applicative[F]): F[A] = F.fromEither(either)
+  }
+
+  implicit class OptionLiftSyntax[F[_], E, A](option: Option[A])(implicit F: Raise[F, E]) {
+    def liftTo(err: E)(implicit A: Applicative[F]): F[A] = F.fromOption(err)(option)
+  }
+
+  implicit class OptionRaiseSyntax[F[_], E2, E1 <: E2](option: Option[E1])(implicit F: Raise[F, E2]) {
+    def raiseTo(implicit A: Applicative[F]): F[Unit] = option.fold(A.unit)(F.raise)
+  }
+
   implicit class HandleToSyntax[F[_], G[_], E, A](fa: F[A])(implicit F: HandleTo[F, G, E]) {
     def handleWith(f: E => G[A]): G[A] = F.handleWith(fa)(f)
     def handle(f: E => A)(implicit AG: Applicative[G]): G[A] = F.handle(fa)(f)
