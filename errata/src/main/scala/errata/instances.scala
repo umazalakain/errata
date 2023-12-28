@@ -17,7 +17,7 @@
 package errata
 
 import cats.{Applicative, ApplicativeError, Id, Monad}
-import cats.data.{EitherT, OptionT, ReaderT}
+import cats.data.{EitherT, Kleisli, Nested, OptionT, ReaderT, Validated, WriterT}
 
 import scala.reflect.ClassTag
 
@@ -184,6 +184,51 @@ object Bases {
           None
         override def handleWith[A](fa: Option[A])(f: Unit => Id[A]): Id[A] =
           fa.getOrElse(f(()))
+      }
+
+    final implicit def validatedInstance[E]: ErrorsTo[Validated[E, _], Id, E] =
+      new ErrorsTo[Validated[E, _], Id, E] {
+        override def raise[A](err: E): Validated[E, A] =
+          Validated.Invalid(err)
+        override def handleWith[A](fa: Validated[E, A])(f: E => Id[A]): Id[A] =
+          fa.fold(f, identity)
+      }
+
+    final implicit def kleisliInstance[F[_], G[_], L, E](implicit
+        R: Raise[F, E],
+        H: HandleTo[F, G, E]
+    ): ErrorsTo[Kleisli[F, L, _], Kleisli[G, L, _], E] =
+      new ErrorsTo[Kleisli[F, L, _], Kleisli[G, L, _], E] {
+        override def raise[A](err: E): Kleisli[F, L, A] =
+          Kleisli(_ => R.raise[A](err))
+        override def handleWith[A](fa: Kleisli[F, L, A])(f: E => Kleisli[G, L, A]): Kleisli[G, L, A] =
+          Kleisli(k => H.handleWith(fa.run(k))(f `andThen` (_.run(k))))
+      }
+
+    final implicit def nestedInstance[F[_], G[_], H[_], E](implicit
+        R: Raise[F, E],
+        H: HandleTo[F, G, E],
+        AF: Applicative[F],
+        AH: Applicative[H]
+    ): ErrorsTo[Nested[F, H, _], Nested[G, H, _], E] =
+      new ErrorsTo[Nested[F, H, _], Nested[G, H, _], E] {
+        override def raise[A](err: E): Nested[F, H, A] =
+          Nested(AF.map(R.raise[A](err))(AH.pure))
+
+        override def handleWith[A](fa: Nested[F, H, A])(f: E => Nested[G, H, A]): Nested[G, H, A] =
+          Nested(H.handleWith(fa.value)(f `andThen` (_.value)))
+      }
+
+    final implicit def writerTInstance[F[_], G[_], L, E](implicit
+        R: Raise[F, E],
+        H: HandleTo[F, G, E]
+    ): ErrorsTo[WriterT[F, L, _], WriterT[G, L, _], E] =
+      new ErrorsTo[WriterT[F, L, _], WriterT[G, L, _], E] {
+        override def raise[A](err: E): WriterT[F, L, A] =
+          WriterT(R.raise[(L, A)](err))
+
+        override def handleWith[A](fa: WriterT[F, L, A])(f: E => WriterT[G, L, A]): WriterT[G, L, A] =
+          WriterT(H.handleWith(fa.run)(f `andThen` (_.run)))
       }
   }
 }
