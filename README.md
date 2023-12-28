@@ -31,6 +31,11 @@ In this case, we lose information about the types of errors we raise, and must n
 > :warning: **As a consequence of all of the above, services based on error handling à la cats are brittle and unnecessarily prone to runtime crashes:
 > it becomes impossible to track which modules raise what errors, and the compiler cannot ensure that errors are appropriately dealt with**.
 
+Cats-mtl takes a step in the right direction by defining types [`Raise[F[_], E]`](https://typelevel.org/cats-mtl/mtl-classes/raise.html) and [`Handle[F[_], E]`](https://typelevel.org/cats-mtl/mtl-classes/handle.html).
+However, we notice that `Handle[F, E]` 1) extends `Raise[F, E]` and 2) doesn't bind an output effect — like errata's `HandleTo[F, G, E]` does.
+As a consequence, we cannot limit a function to error handling _only_ (it will be able to raise errors too), and we cannot use effect types to keep track of error handling (the output effect type will be the same).
+Errata provides solutions to both these shortcomings.
+
 ## Solution
 
 This project exposes the error handling capabilities provided by [ToFu](https://github.com/tofu-tf/tofu/).
