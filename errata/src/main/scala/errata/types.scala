@@ -16,8 +16,9 @@
 
 package errata
 
+import cats.data.Validated
 import cats.{Applicative, Functor}
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import scala.annotation.implicitNotFound
 
@@ -31,6 +32,9 @@ trait Raise[F[_], E] {
   def raise[A](err: E): F[A]
 
   def fromEither[A](x: Either[E, A])(implicit F: Applicative[F]): F[A] =
+    x.fold(raise, F.pure)
+
+  def fromValidated[A](x: Validated[E, A])(implicit F: Applicative[F]): F[A] =
     x.fold(raise, F.pure)
 
   def fromOption[A](e: E)(x: Option[A])(implicit F: Applicative[F]): F[A] =

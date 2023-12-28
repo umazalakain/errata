@@ -16,6 +16,7 @@
 
 package errata
 
+import cats.data.Validated
 import cats.{Applicative, Functor}
 
 object syntax {
@@ -25,6 +26,10 @@ object syntax {
 
   implicit class EitherLiftSyntax[F[_], E2, E1 <: E2, A](either: Either[E1, A])(implicit F: Raise[F, E2]) {
     def liftTo(implicit A: Applicative[F]): F[A] = F.fromEither(either)
+  }
+
+  implicit class ValidatedLiftSyntax[F[_], E2, E1 <: E2, A](validated: Validated[E1, A])(implicit F: Raise[F, E2]) {
+    def liftTo(implicit A: Applicative[F]): F[A] = F.fromValidated(validated)
   }
 
   implicit class OptionLiftSyntax[F[_], E, A](option: Option[A])(implicit F: Raise[F, E]) {
