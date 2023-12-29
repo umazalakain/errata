@@ -8,7 +8,7 @@ This project compiles to Scala 3.x and Scala 2.13.
 
 Add it as an sbt dependency:
 ```scala
-libraryDependencies += "info.umazalakain" %% "errata" % "0.2.0"
+libraryDependencies += "info.umazalakain" %% "errata" % version
 ```
 
 ## Rationale
