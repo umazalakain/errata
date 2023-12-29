@@ -73,12 +73,20 @@ You may check them out in more detail [here](errata/src/main/scala/errata/types.
 - `Errors[F[_], E]`: equivalent to `ErrorsTo[F, F, E]` plus convenience methods.
 - `TransformTo[F[_], G[_], E1, E2]`: equivalent to `HandleTo[F, G, E1]` plus `Raise[G, E2]`, plus convenience methods.
 
+We also define type aliases `HandleToThrow`, `HandleThrow`, `ErrorsToThrow`, and `ErrorsThrow`: they instantiate the `E` error parameter of their respective types to `Throwable`.
+
 ### Syntax
 
 We provide convenience syntax for error types `E` and effect types `F[A]`.
 It can be brought into scope with:
 ```scala
-import errata.syntax.*
+import errata.syntax.all.*
+```
+Sometimes this syntax can conflict with the syntax of cats or other libraries.
+As a workaround, we provide a namespaced version, where you use `.withErrata` to bring into scope errata's syntax.
+Import it with:
+```scala
+import errata.syntax.namespaced.*
 ```
 
 ### Example instances
