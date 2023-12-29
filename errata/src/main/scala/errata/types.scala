@@ -41,8 +41,6 @@ trait Raise[F[_], E] {
     x.fold(raise[A](e))(F.pure)
 }
 
-type RaiseThrow[F[_]] = Raise[F, Throwable]
-
 object Raise {
   def apply[F[_], E](implicit ev: Raise[F, E]): Raise[F, E] = ev
 }
@@ -70,8 +68,6 @@ trait HandleTo[F[_], G[_], E] {
   )(implicit F: Functor[F], G: Applicative[G]): G[Either[E, A]] =
     handle(F.map(fa)(_.asRight[E]))(_.asLeft)
 }
-
-type HandleToThrow[F[_], G[_]] = HandleTo[F, G, Throwable]
 
 object HandleTo {
   def apply[F[_], G[_], E](implicit ev: HandleTo[F, G[_], E]): HandleTo[F, G[_], E] = ev
@@ -107,8 +103,6 @@ trait Handle[F[_], E] extends HandleTo[F, F, E] {
     handleWith(fa)(_ => ra)
 }
 
-type HandleThrow[F[_]] = Handle[F, Throwable]
-
 object Handle {
   def apply[F[_], E](implicit ev: Handle[F, E]): Handle[F, E] = ev
 
@@ -128,8 +122,6 @@ object Handle {
 provide an instance of ErrorsTo[${F}, ${G}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
 trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
-
-type ErrorsToThrow[F[_], G[_]] = ErrorsTo[F, G, Throwable]
 
 object ErrorsTo {
   def apply[F[_], G[_], E](implicit ev: ErrorsTo[F, G, E]): ErrorsTo[F, G, E] = ev
@@ -158,8 +150,6 @@ object TransformTo {
 provide an instance of Errors[${F}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
 trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E] with TransformTo[F, F, E, E]
-
-type ErrorsThrow[F[_]] = Errors[F, Throwable]
 
 object Errors {
   def apply[F[_], E](implicit ev: Errors[F, E]): Errors[F, E] = ev
