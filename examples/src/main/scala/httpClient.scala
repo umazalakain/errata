@@ -74,7 +74,7 @@ object httpClient extends IOApp {
         // Handle happy case
         case (_, _) => ()
       }
-      .handleWith {
+      .handleWith[H, AppError] {
         // Handle errors
         case RestAPIError(th) =>
           Console[H].println(s"REST API error: ${th.getMessage}")
