@@ -19,7 +19,7 @@ import cats.effect.std.Console
 import cats.syntax.all.*
 import cats.{Applicative, MonadThrow}
 import errata.*
-import errata.syntax.*
+import errata.syntax.all.*
 
 /*
 This example demonstrates the interoperability between this project and cats errors.
