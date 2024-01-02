@@ -17,7 +17,6 @@
 package errata
 
 import cats.data.Validated
-import cats.implicits.catsSyntaxEitherId
 import cats.{Applicative, Functor, Id}
 
 object syntax {
@@ -66,7 +65,7 @@ object syntax {
       def restore(implicit FF: Functor[F], AG: Applicative[G]): G[Option[A]] =
         F.restore(fa)
       def attempt(implicit FF: Functor[F], AG: Applicative[G]): G[Either[E, A]] =
-        F.handle(FF.map(fa)(_.asRight[E]))(_.asLeft)
+        F.attempt(fa)
     }
 
     implicit class HandleSyntax[F[_], E, A](fa: Tag[F[A]])(implicit F: Handle[F, E]) {
