@@ -28,7 +28,7 @@ import scala.annotation.implicitNotFound
   """can't understand how to raise ${E} inside ${F}
 provide an instance of Raise[${F}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
-trait Raise[F[_], E] {
+trait Raise[F[_], -E] {
   def raise[A](err: E): F[A]
 
   def fromEither[A](x: Either[E, A])(implicit F: Applicative[F]): F[A] =
@@ -52,7 +52,7 @@ object Raise {
   """can't understand how to recover from ${E} in the type ${F} to the subtype ${G}
 provide an instance of HandleTo[${F}, ${G}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
-trait HandleTo[F[_], G[_], E] {
+trait HandleTo[F[_], G[_], +E] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
 
   def handle[A](fa: F[A])(f: E => A)(implicit G: Applicative[G]): G[A] =
@@ -62,14 +62,16 @@ trait HandleTo[F[_], G[_], E] {
       fa: F[A]
   )(implicit F: Functor[F], G: Applicative[G]): G[Option[A]] =
     handle(F.map(fa)(_.some))(_ => None)
-
-  def attempt[A](
-      fa: F[A]
-  )(implicit F: Functor[F], G: Applicative[G]): G[Either[E, A]] =
-    handle(F.map(fa)(_.asRight[E]))(_.asLeft)
 }
 
 object HandleTo {
+
+  implicit class HandleToAttemptOps[F[_], G[_], E](handleTo: HandleTo[F, G[_], E]){
+    def attempt[A](
+                    fa: F[A]
+                  )(implicit F: Functor[F], G: Applicative[G]): G[Either[E, A]] =
+      handleTo.handle(F.map(fa)(_.asRight[E]))(_.asLeft)
+  }
   def apply[F[_], G[_], E](implicit ev: HandleTo[F, G[_], E]): HandleTo[F, G[_], E] = ev
 }
 
