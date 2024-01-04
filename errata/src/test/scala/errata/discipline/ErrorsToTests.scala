@@ -49,8 +49,8 @@ trait ErrorsToTests[F[_], G[_], E] extends RaiseTests[F, E] with HandleToTests[F
         "handleWith f . raise e = f" -> forAll(laws.raiseHandleWith[A] _),
         "handle f . raise e = pure f" -> forAll(laws.raiseHandle[A] _),
         "restore . raise e = pure none" -> forAll(laws.raiseRestore[A] _),
-        "attempt . raise e = pure left e" -> forAll(laws.raiseAttempt[A] _),
-        "restore . fromOption e opt = pure opt" -> forAll(laws.fromEitherAttempt[A] _),
+        "attempt . raise e = pure left e" -> forAll(laws.raiseAttempt[A, E] _),
+        "restore . fromOption e opt = pure opt" -> forAll(laws.fromEitherAttempt[A, E] _),
         "attempt . fromEither e eth = pure eth" -> forAll(laws.fromOptionRestore[A] _)
       )
     }

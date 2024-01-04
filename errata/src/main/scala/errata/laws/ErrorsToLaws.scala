@@ -34,15 +34,15 @@ trait ErrorsToLaws[F[_], G[_], E] extends RaiseLaws[F, E] with HandleToLaws[F, G
   )(implicit FF: Functor[F], AG: Applicative[G]): IsEq[G[Option[A]]] =
     F.restore[A](F.raise(e)) <-> AG.pure(None: Option[A])
 
-  def raiseAttempt[A](
+  def raiseAttempt[A, EE >: E](
       e: E
-  )(implicit FF: Functor[F], AG: Applicative[G]): IsEq[G[Either[E, A]]] =
-    F.attempt[A](F.raise(e)) <-> AG.pure(Left[E, A](e))
+  )(implicit FF: Functor[F], AG: Applicative[G]): IsEq[G[Either[EE, A]]] =
+    F.attempt[A, EE](F.raise(e)) <-> AG.pure(Left[E, A](e))
 
-  def fromEitherAttempt[A](
+  def fromEitherAttempt[A, EE >: E](
       either: Either[E, A]
-  )(implicit AF: Applicative[F], AG: Applicative[G]): IsEq[G[Either[E, A]]] =
-    F.attempt[A](F.fromEither(either)) <-> AG.pure(either)
+  )(implicit AF: Applicative[F], AG: Applicative[G]): IsEq[G[Either[EE, A]]] =
+    F.attempt[A, EE](F.fromEither(either)) <-> AG.pure(either)
 
   def fromOptionRestore[A](option: Option[A], e: E)(implicit
       AF: Applicative[F],

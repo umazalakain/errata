@@ -62,16 +62,14 @@ trait HandleTo[F[_], G[_], +E] {
       fa: F[A]
   )(implicit F: Functor[F], G: Applicative[G]): G[Option[A]] =
     handle(F.map(fa)(_.some))(_ => None)
+
+  def attempt[A, EE >: E](
+                  fa: F[A]
+                )(implicit F: Functor[F], G: Applicative[G]): G[Either[EE, A]] =
+    handle(F.map(fa)(_.asRight[EE]))(_.asLeft)
 }
 
 object HandleTo {
-
-  implicit class HandleToAttemptOps[F[_], G[_], E](handleTo: HandleTo[F, G[_], E]) {
-    def attempt[A](
-        fa: F[A]
-    )(implicit F: Functor[F], G: Applicative[G]): G[Either[E, A]] =
-      handleTo.handle(F.map(fa)(_.asRight[E]))(_.asLeft)
-  }
   def apply[F[_], G[_], E](implicit ev: HandleTo[F, G[_], E]): HandleTo[F, G[_], E] = ev
 }
 
