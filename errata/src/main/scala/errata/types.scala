@@ -64,8 +64,8 @@ trait HandleTo[F[_], G[_], +E] {
     handle(F.map(fa)(_.some))(_ => None)
 
   def attempt[A, EE >: E](
-                  fa: F[A]
-                )(implicit F: Functor[F], G: Applicative[G]): G[Either[EE, A]] =
+      fa: F[A]
+  )(implicit F: Functor[F], G: Applicative[G]): G[Either[EE, A]] =
     handle(F.map(fa)(_.asRight[EE]))(_.asLeft)
 }
 
