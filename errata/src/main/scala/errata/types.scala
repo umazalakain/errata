@@ -134,7 +134,7 @@ object ErrorsTo {
   """can't understand how to transform errors ${E1} in ${F} into errors ${E2} in ${G}
 provide an instance of TransformTo[${F}, ${G}, ${E1}, ${E2}] or cats.ApplicativeError[${F}, ${E1}] and cats.ApplicativeError[${G}, ${E2}]"""
 )
-trait TransformTo[F[_], G[_], E1, E2] extends HandleTo[F, G, E1] with Raise[G, E2] {
+trait TransformTo[F[_], G[_], +E1, -E2] extends HandleTo[F, G, E1] with Raise[G, E2] {
   def transform[A](fa: F[A])(f: E1 => E2): G[A] =
     handleWith(fa)(f `andThen` raise)
 }
