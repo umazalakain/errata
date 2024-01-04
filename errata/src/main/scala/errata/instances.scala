@@ -17,7 +17,7 @@
 package errata
 
 import cats.{Applicative, ApplicativeError, Id, Monad}
-import cats.data.{EitherT, Kleisli, Nested, OptionT, ReaderT, Validated, WriterT}
+import cats.data.{EitherT, Kleisli, Nested, OptionT, Validated, WriterT}
 
 import scala.reflect.ClassTag
 
@@ -126,27 +126,61 @@ object Bases {
     }
   }
 
-  trait ErrorsInstances extends ApplicativeErrorInstances {
-    final implicit def readerTErrors[F[_], R, E](implicit
-        F: Errors[F, E]
-    ): Errors[ReaderT[F, R, _], E] =
-      new Errors[ReaderT[F, R, _], E] {
-        def raise[A](err: E): ReaderT[F, R, A] =
-          ReaderT.liftF(F.raise(err))
-
-        def tryHandleWith[A](fa: ReaderT[F, R, A])(
-            f: E => Option[ReaderT[F, R, A]]
-        ): ReaderT[F, R, A] =
-          ReaderT(r => F.tryHandleWith(fa.run(r))(e => f(e).map(_.run(r))))
-
-        def restore[A](fa: ReaderT[F, R, A])(implicit
-            AF: Applicative[F]
-        ): ReaderT[F, R, Option[A]] =
-          ReaderT(r => F.restore(fa.run(r)))
-
-        def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
+  trait RecursiveRaiseInstances extends ApplicativeErrorInstances {
+    final implicit def kleisliRaise[F[_], L, E](implicit
+        R: Raise[F, E]
+    ): Raise[Kleisli[F, L, _], E] =
+      new Raise[Kleisli[F, L, _], E] {
+        override def raise[A](err: E): Kleisli[F, L, A] =
+          Kleisli(_ => R.raise[A](err))
       }
 
+    final implicit def writerTRaise[F[_], L, E](implicit
+        R: Raise[F, E]
+    ): Raise[WriterT[F, L, _], E] =
+      new Raise[WriterT[F, L, _], E] {
+        override def raise[A](err: E): WriterT[F, L, A] =
+          WriterT(R.raise[(L, A)](err))
+      }
+
+    final implicit def nestedRaise[F[_], H[_], E](implicit
+        R: Raise[F, E],
+        AF: Applicative[F],
+        AH: Applicative[H]
+    ): Raise[Nested[F, H, _], E] =
+      new Raise[Nested[F, H, _], E] {
+        override def raise[A](err: E): Nested[F, H, A] =
+          Nested(AF.map(R.raise[A](err))(AH.pure))
+      }
+  }
+
+  trait RecursiveHandleToInstances extends RecursiveRaiseInstances {
+    final implicit def kleisliHandleTo[F[_], G[_], L, E](implicit
+        H: HandleTo[F, G, E]
+    ): HandleTo[Kleisli[F, L, _], Kleisli[G, L, _], E] =
+      new HandleTo[Kleisli[F, L, _], Kleisli[G, L, _], E] {
+        override def handleWith[A](fa: Kleisli[F, L, A])(f: E => Kleisli[G, L, A]): Kleisli[G, L, A] =
+          Kleisli(k => H.handleWith(fa.run(k))(f `andThen` (_.run(k))))
+      }
+
+    final implicit def nestedHandleTo[F[_], G[_], H[_], E](implicit
+        H: HandleTo[F, G, E]
+    ): HandleTo[Nested[F, H, _], Nested[G, H, _], E] =
+      new HandleTo[Nested[F, H, _], Nested[G, H, _], E] {
+        override def handleWith[A](fa: Nested[F, H, A])(f: E => Nested[G, H, A]): Nested[G, H, A] =
+          Nested(H.handleWith(fa.value)(f `andThen` (_.value)))
+      }
+
+    final implicit def writerTHandleTo[F[_], G[_], L, E](implicit
+        H: HandleTo[F, G, E]
+    ): HandleTo[WriterT[F, L, _], WriterT[G, L, _], E] =
+      new HandleTo[WriterT[F, L, _], WriterT[G, L, _], E] {
+        override def handleWith[A](fa: WriterT[F, L, A])(f: E => WriterT[G, L, A]): WriterT[G, L, A] =
+          WriterT(H.handleWith(fa.run)(f `andThen` (_.run)))
+      }
+  }
+
+  trait ErrorsInstances extends RecursiveHandleToInstances {
     final implicit def eitherInstance1[E]: Errors[Either[E, _], E] =
       new Errors[Either[E, _], E] {
         override def raise[A](err: E): Either[E, A] =
@@ -213,55 +247,6 @@ object Bases {
           fa.fold(f, identity)
       }
 
-    final implicit def kleisliRaise[F[_], L, E](implicit
-        R: Raise[F, E]
-    ): Raise[Kleisli[F, L, _], E] =
-      new Raise[Kleisli[F, L, _], E] {
-        override def raise[A](err: E): Kleisli[F, L, A] =
-          Kleisli(_ => R.raise[A](err))
-      }
-
-    final implicit def kleisliHandleTo[F[_], G[_], L, E](implicit
-        H: HandleTo[F, G, E]
-    ): HandleTo[Kleisli[F, L, _], Kleisli[G, L, _], E] =
-      new HandleTo[Kleisli[F, L, _], Kleisli[G, L, _], E] {
-        override def handleWith[A](fa: Kleisli[F, L, A])(f: E => Kleisli[G, L, A]): Kleisli[G, L, A] =
-          Kleisli(k => H.handleWith(fa.run(k))(f `andThen` (_.run(k))))
-      }
-
-    final implicit def nestedRaise[F[_], H[_], E](implicit
-        R: Raise[F, E],
-        AF: Applicative[F],
-        AH: Applicative[H]
-    ): Raise[Nested[F, H, _], E] =
-      new Raise[Nested[F, H, _], E] {
-        override def raise[A](err: E): Nested[F, H, A] =
-          Nested(AF.map(R.raise[A](err))(AH.pure))
-      }
-
-    final implicit def nestedHandleTo[F[_], G[_], H[_], E](implicit
-        H: HandleTo[F, G, E]
-    ): HandleTo[Nested[F, H, _], Nested[G, H, _], E] =
-      new HandleTo[Nested[F, H, _], Nested[G, H, _], E] {
-        override def handleWith[A](fa: Nested[F, H, A])(f: E => Nested[G, H, A]): Nested[G, H, A] =
-          Nested(H.handleWith(fa.value)(f `andThen` (_.value)))
-      }
-
-    final implicit def writerTRaise[F[_], L, E](implicit
-        R: Raise[F, E]
-    ): Raise[WriterT[F, L, _], E] =
-      new Raise[WriterT[F, L, _], E] {
-        override def raise[A](err: E): WriterT[F, L, A] =
-          WriterT(R.raise[(L, A)](err))
-      }
-
-    final implicit def writerTHandleTo[F[_], G[_], L, E](implicit
-        H: HandleTo[F, G, E]
-    ): HandleTo[WriterT[F, L, _], WriterT[G, L, _], E] =
-      new HandleTo[WriterT[F, L, _], WriterT[G, L, _], E] {
-        override def handleWith[A](fa: WriterT[F, L, A])(f: E => WriterT[G, L, A]): WriterT[G, L, A] =
-          WriterT(H.handleWith(fa.run)(f `andThen` (_.run)))
-      }
   }
 }
 
