@@ -79,7 +79,7 @@ object HandleTo {
   """can't understand how to recover from ${E} in the type ${F}
 provide an instance of Handle[${F}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
-trait Handle[F[_], E] extends HandleTo[F, F, E] {
+trait Handle[F[_], +E] extends HandleTo[F, F, E] {
 
   def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A]
 
