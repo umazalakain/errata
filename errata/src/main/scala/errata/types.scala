@@ -28,7 +28,7 @@ import scala.annotation.implicitNotFound
   """can't understand how to raise ${E} inside ${F}
 provide an instance of Raise[${F}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
-trait Raise[F[_], E] {
+trait Raise[F[_], -E] {
   def raise[A](err: E): F[A]
 
   def fromEither[A](x: Either[E, A])(implicit F: Applicative[F]): F[A] =
@@ -52,7 +52,7 @@ object Raise {
   """can't understand how to recover from ${E} in the type ${F} to the subtype ${G}
 provide an instance of HandleTo[${F}, ${G}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
-trait HandleTo[F[_], G[_], E] {
+trait HandleTo[F[_], G[_], +E] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
 
   def handle[A](fa: F[A])(f: E => A)(implicit G: Applicative[G]): G[A] =
@@ -63,10 +63,10 @@ trait HandleTo[F[_], G[_], E] {
   )(implicit F: Functor[F], G: Applicative[G]): G[Option[A]] =
     handle(F.map(fa)(_.some))(_ => None)
 
-  def attempt[A](
+  def attempt[A, EE >: E](
       fa: F[A]
-  )(implicit F: Functor[F], G: Applicative[G]): G[Either[E, A]] =
-    handle(F.map(fa)(_.asRight[E]))(_.asLeft)
+  )(implicit F: Functor[F], G: Applicative[G]): G[Either[EE, A]] =
+    handle(F.map(fa)(_.asRight[EE]))(_.asLeft)
 }
 
 object HandleTo {
@@ -79,7 +79,7 @@ object HandleTo {
   """can't understand how to recover from ${E} in the type ${F}
 provide an instance of Handle[${F}, ${E}] or cats.ApplicativeError[${F}, ${E}]"""
 )
-trait Handle[F[_], E] extends HandleTo[F, F, E] {
+trait Handle[F[_], +E] extends HandleTo[F, F, E] {
 
   def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A]
 
@@ -134,7 +134,7 @@ object ErrorsTo {
   """can't understand how to transform errors ${E1} in ${F} into errors ${E2} in ${G}
 provide an instance of TransformTo[${F}, ${G}, ${E1}, ${E2}] or cats.ApplicativeError[${F}, ${E1}] and cats.ApplicativeError[${G}, ${E2}]"""
 )
-trait TransformTo[F[_], G[_], E1, E2] extends HandleTo[F, G, E1] with Raise[G, E2] {
+trait TransformTo[F[_], G[_], +E1, -E2] extends HandleTo[F, G, E1] with Raise[G, E2] {
   def transform[A](fa: F[A])(f: E1 => E2): G[A] =
     handleWith(fa)(f `andThen` raise)
 }
