@@ -27,6 +27,7 @@ import scala.reflect.ClassTag
  */
 
 final case class WrappedError[E](tag: ClassTag[E], value: E) extends Throwable
+final case class UnexpectedClassTag[E1, E2](expected: ClassTag[E1], actual: ClassTag[E2]) extends Error
 
 object Bases {
   trait Constituents {
@@ -66,8 +67,9 @@ object Bases {
       new Handle[F, E] {
         override def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] =
           F.tryHandleWith(fa) {
-            case WrappedError(tag, value) if tag == etag =>
-              f(value.asInstanceOf[E])
+            case WrappedError(tag, value) =>
+              if (tag == etag) f(value.asInstanceOf[E])
+              else throw UnexpectedClassTag(etag, tag)
             case _ => None
           }
       }
@@ -78,20 +80,6 @@ object Bases {
     ): Raise[F, E] =
       new Raise[F, E] {
         override def raise[A](err: E): F[A] = F.raise(WrappedError(etag, err))
-      }
-
-    final implicit def errorsThrowable[F[_], E](implicit
-        F: Errors[F, Throwable],
-        etag: ClassTag[E]
-    ): Errors[F, E] =
-      new Errors[F, E] {
-        override def raise[A](err: E): F[A] = F.raise(WrappedError(etag, err))
-        override def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] =
-          F.tryHandleWith(fa) {
-            case WrappedError(tag, value) if tag == etag =>
-              f(value.asInstanceOf[E])
-            case _ => None
-          }
       }
   }
 
