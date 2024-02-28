@@ -31,6 +31,7 @@ lazy val errata = project
     crossScalaVersions := Seq(scala3Version, scala2Version),
     libraryDependencies ++= List(
       "org.typelevel" %% "cats-core" % "2.10.0",
+      "org.typelevel" %% "cats-effect" % "3.5.2" % Test,
       "org.typelevel" %% "discipline-munit" % "1.0.9" % Test
     )
   )
