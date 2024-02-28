@@ -20,4 +20,19 @@ package object errata {
   type HandleThrow[F[_]] = Handle[F, Throwable]
   type ErrorsToThrow[F[_], G[_]] = ErrorsTo[F, G, Throwable]
   type ErrorsThrow[F[_]] = Errors[F, Throwable]
+  object RaiseThrow {
+    def apply[F[_]](implicit ev: RaiseThrow[F]): RaiseThrow[F] = ev
+  }
+  object HandleToThrow {
+    def apply[F[_], G[_]](implicit ev: HandleToThrow[F, G]): HandleToThrow[F, G] = ev
+  }
+  object HandleThrow {
+    def apply[F[_]](implicit ev: HandleThrow[F]): HandleThrow[F] = ev
+  }
+  object ErrorsToThrow {
+    def apply[F[_], G[_]](implicit ev: ErrorsToThrow[F, G]): ErrorsToThrow[F, G] = ev
+  }
+  object ErrorsThrow {
+    def apply[F[_]](implicit ev: ErrorsThrow[F]): ErrorsThrow[F] = ev
+  }
 }
