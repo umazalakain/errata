@@ -20,6 +20,7 @@ import cats.syntax.all.*
 import cats.{Applicative, MonadThrow}
 import errata.*
 import errata.syntax.all.*
+import errata.instances.*
 
 /*
 This example demonstrates the interoperability between this project and cats errors.
@@ -85,8 +86,8 @@ object httpClient extends IOApp {
 
   def run(args: List[String]): IO[ExitCode] = {
     // Fully cats compatible
-    // Automatically derives instances of TransformTo[IO, IO, Throwable, HttpClientError] and HandleTo[IO, IO, AppError]
-    import errata.instances.*
+    // Automatically derives instances of TransformTo[IO, IO, Throwable, AppError] and HandleTo[IO, IO, AppError]
+    implicit val appErrors: Errors[IO, AppError] = errorsThrowable(classTag[AppError])
     IO.println("Expecting a properly handled error") *>
       appLogic[IO, IO, IO, Unit](HttpClient[IO]).as(ExitCode.Success)
   }

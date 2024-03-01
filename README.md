@@ -112,6 +112,11 @@ final implicit def eitherInstance[E]: ErrorsTo[Either[E, _], Id, E] =
 Full interoperability with cats and its `ApplicativeError` and `ApplicativeThrow` is provided in `errata.instances.*`.
 Check out [the examples](examples/src/main/scala/).
 
+To derive an `Errors[F, E]` instance given an `cats.Applicative[F]`:
+```scala
+import errata.instances.*
+implicit val errorsFE: Errors[F, E] = errorsThrowable(classTag[E])
+```
 
 ## Algebraic laws and testing
 
@@ -131,7 +136,8 @@ import cats.effect.std.Console
 import cats.syntax.all.*
 import cats.{Applicative, MonadThrow}
 import errata.*
-import errata.syntax.*
+import errata.syntax.all.*
+import errata.instances.*
 
 /*
 This example demonstrates the interoperability between this project and cats errors.
@@ -154,9 +160,11 @@ object httpClient extends IOApp {
     def run[A]: F[A]
   }
   object HttpClient {
-    def apply[F[_]](implicit F: MonadThrow[F]): HttpClient[F] = new HttpClient[F] {
-      override def run[A]: F[A] = F.raiseError(new Throwable("Some kind of error"))
-    }
+    def apply[F[_]](implicit F: MonadThrow[F]): HttpClient[F] =
+      new HttpClient[F] {
+        override def run[A]: F[A] =
+          F.raiseError(new Throwable("Some kind of error"))
+      }
   }
 
   // Application-wide custom error types
@@ -171,9 +179,11 @@ object httpClient extends IOApp {
   //   all errors of type AppError are handled and gone from H
   // The lack of an instance Raise[H, E] guarantees that:
   //   the resulting effect H raises no errors at all
-  def appLogic[F[_], G[_]: Applicative, H[_]: Applicative: Console, A](httpClient: HttpClient[F])(implicit
-    transformTo: TransformTo[F, G, Throwable, AppError],
-    handleTo: HandleTo[G, H, AppError]
+  def appLogic[F[_], G[_]: Applicative, H[_]: Applicative: Console, A](
+      httpClient: HttpClient[F]
+  )(implicit
+      transformTo: TransformTo[F, G, Throwable, AppError],
+      handleTo: HandleTo[G, H, AppError]
   ): H[Unit] = {
     val apiResponse: G[A] = httpClient.run[A].transform(RestAPIError.apply)
     val graphqlResponse: G[A] = httpClient.run[A].transform(GraphQLError.apply)
@@ -182,17 +192,19 @@ object httpClient extends IOApp {
         // Handle happy case
         case (_, _) => ()
       }
-      .handleWith {
+      .handleWith[H, AppError] {
         // Handle errors
-        case RestAPIError(th) => Console[H].println(s"REST API error: ${th.getMessage}")
-        case GraphQLError(th) => Console[H].println(s"GraphQL error: ${th.getMessage}")
+        case RestAPIError(th) =>
+          Console[H].println(s"REST API error: ${th.getMessage}")
+        case GraphQLError(th) =>
+          Console[H].println(s"GraphQL error: ${th.getMessage}")
       }
   }
 
   def run(args: List[String]): IO[ExitCode] = {
     // Fully cats compatible
-    // Automatically derives instances of TransformTo[IO, IO, Throwable, HttpClientError] and HandleTo[IO, IO, AppError]
-    import errata.instances.*
+    // Automatically derives instances of TransformTo[IO, IO, Throwable, AppError] and HandleTo[IO, IO, AppError]
+    implicit val appErrors: Errors[IO, AppError] = errorsThrowable(classTag[AppError])
     IO.println("Expecting a properly handled error") *>
       appLogic[IO, IO, IO, Unit](HttpClient[IO]).as(ExitCode.Success)
   }

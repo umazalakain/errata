@@ -60,10 +60,7 @@ object Bases {
   }
 
   trait ThrowableInstances extends Constituents {
-    final implicit def handleThrowable[F[_], E](implicit
-        F: Handle[F, Throwable],
-        etag: ClassTag[E]
-    ): Handle[F, E] =
+    final def handleThrowable[F[_], E](etag: ClassTag[E])(implicit F: Handle[F, Throwable]): Handle[F, E] =
       new Handle[F, E] {
         override def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] =
           F.tryHandleWith(fa) {
@@ -74,13 +71,15 @@ object Bases {
           }
       }
 
-    final implicit def raiseThrowable[F[_], E](implicit
-        F: Raise[F, Throwable],
-        etag: ClassTag[E]
-    ): Raise[F, E] =
+    final def raiseThrowable[F[_], E](etag: ClassTag[E])(implicit F: Raise[F, Throwable]): Raise[F, E] =
       new Raise[F, E] {
         override def raise[A](err: E): F[A] = F.raise(WrappedError(etag, err))
       }
+
+    final def errorsThrowable[F[_], E](
+        etag: ClassTag[E]
+    )(implicit F: Raise[F, Throwable], G: Handle[F, Throwable]): Errors[F, E] =
+      raiseHandleErrors(raiseThrowable(etag), handleThrowable(etag))
   }
 
   trait ApplicativeErrorInstances extends ThrowableInstances {
@@ -238,4 +237,6 @@ object Bases {
   }
 }
 
-object instances extends Bases.ErrorsToInstances
+object instances extends Bases.ErrorsToInstances {
+  def classTag[A](implicit ct: ClassTag[A]): ClassTag[A] = ct
+}
