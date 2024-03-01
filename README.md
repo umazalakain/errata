@@ -179,7 +179,7 @@ object httpClient extends IOApp {
   //   all errors of type AppError are handled and gone from H
   // The lack of an instance Raise[H, E] guarantees that:
   //   the resulting effect H raises no errors at all
-  def appLogic[F[_], G[_]: Applicative, H[_]: Applicative: Console, A](
+  def appLogic[F[_], G[_]: Applicative, H[_]: Console, A](
       httpClient: HttpClient[F]
   )(implicit
       transformTo: TransformTo[F, G, Throwable, AppError],
@@ -209,4 +209,5 @@ object httpClient extends IOApp {
       appLogic[IO, IO, IO, Unit](HttpClient[IO]).as(ExitCode.Success)
   }
 }
+
 ```

@@ -90,7 +90,7 @@ object Bases {
     final def errorsThrowable[F[_], E](
         etag: ClassTag[E]
     )(implicit F: Raise[F, Throwable], G: Handle[F, Throwable]): Errors[F, E] =
-      raiseHandleErrors(raiseThrowable(etag), handleThrowable(etag))
+      raiseHandleErrors(raiseThrowable(etag)(F), handleThrowable(etag)(G))
   }
 
   trait ApplicativeErrorInstances extends ThrowableInstances {
