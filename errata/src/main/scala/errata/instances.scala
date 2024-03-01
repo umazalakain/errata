@@ -27,7 +27,9 @@ import scala.reflect.ClassTag
  */
 
 final case class WrappedError[E](tag: ClassTag[E], value: E) extends Throwable
-final case class UnexpectedClassTag[E1, E2](expected: ClassTag[E1], actual: ClassTag[E2]) extends Error
+final case class UnexpectedClassTag[E1, E2](expected: ClassTag[E1], actual: ClassTag[E2]) extends Error {
+  override def getMessage(): String = s"Expected class tag $expected; actual class tag $actual."
+}
 
 object Bases {
   trait Constituents {
