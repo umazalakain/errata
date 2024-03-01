@@ -20,15 +20,13 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import errata.*
 import errata.syntax.all.*
-import errata.instances.handleThrowable
-import errata.instances.raiseThrowable
-import errata.instances.raiseHandleErrors
-import errata.instances.errorByCatsError
-import scala.reflect.ClassTag
+import errata.instances.*
 
 class CatsCompat extends munit.FunSuite {
   sealed trait Error
   case object ClientError extends Error
+
+  implicit val errors: Errors[IO, Error] = errorsThrowable(classTag[Error])
   val value: IO[Unit] = Raise[IO, Error].raise[Unit](ClientError)
 
   test("Cats effect instances unwrap errors on handle") {
@@ -42,6 +40,7 @@ class CatsCompat extends munit.FunSuite {
   }
 
   test("Handling subtypes of the type of thrown errors results in a meaningful error") {
+    implicit val errors: Errors[IO, ClientError.type] = errorsThrowable(classTag[ClientError.type])
     intercept[UnexpectedClassTag[ClientError.type, Error]] {
       value
         .map(_ => false)
