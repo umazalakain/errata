@@ -49,6 +49,15 @@ object Bases {
         override def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] = H.tryHandleWith(fa)(f)
       }
 
+    final implicit def errorsToErrors[F[_], E](implicit
+        ET: ErrorsTo[F, F, E]
+    ): Errors[F, E] =
+      new Errors[F, E] {
+        override def raise[A](err: E): F[A] = ET.raise(err)
+        override def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] =
+          ET.handleWith(fa)(e => f(e).getOrElse(ET.raise(e)))
+      }
+
     final implicit def raiseHandleToTransformTo[F[_], G[_], E1, E2](implicit
         H: HandleTo[F, G, E1],
         R: Raise[G, E2]
