@@ -13,7 +13,7 @@ libraryDependencies += "info.umazalakain" %% "errata" % version
 
 ## Rationale
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/oMG0yA9poLM?si=0_1XwkZidzcTX6gv" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+There is a [video presentation](https://youtu.be/oMG0yA9poLM?feature=shared&t=60) with this ideas, and also some [slides](docs/lsug-may-2024.pdf) to go with it.
 
 The [approach to error handling taken by cats](https://typelevel.org/cats/typeclasses/applicativemonaderror.html) suffers from several shortcomings.
 Assume a method with signature `def method[F[_]: ApplicativeError[*, AppError], A](fa: F[A]): F[A]`.
