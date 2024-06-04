@@ -13,6 +13,8 @@ libraryDependencies += "info.umazalakain" %% "errata" % version
 
 ## Rationale
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/oMG0yA9poLM?si=0_1XwkZidzcTX6gv" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 The [approach to error handling taken by cats](https://typelevel.org/cats/typeclasses/applicativemonaderror.html) suffers from several shortcomings.
 Assume a method with signature `def method[F[_]: ApplicativeError[*, AppError], A](fa: F[A]): F[A]`.
 It might be the case that `method` raises errors, hence why `ApplicativeError[F, AppError]` is necessary.
